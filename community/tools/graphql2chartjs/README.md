@@ -1,20 +1,39 @@
-# graphql2chartjs
+# graphql2chartjs: Realtime charts made easy with GraphQL and ChartJS
 
-> Realtime charts made easy with GraphQL and ChartJS
+A tool to restructure your GraphQL query's response data as per the [ChartJS](https://chartjs.org) API, so that all it takes to build a chart is a simple GraphQL query.
 
-A tiny tool to restructure your GraphQL data as per the [ChartJS](https://chartjs.org) API thus leveraging Realtime GraphQL API to build Realtime charts.
+**Check out the live demo: [https://graphql2chartjs-examples.herokuapp.com](https://graphql2chartjs-examples.herokuapp.com).**
 
-Check out the live demo [here](https://graphql2chartjs-examples.herokuapp.com).
+## Sample usage
 
-![how convert works](assets/how_convert_works.png)
+```javascript
+// Run a GraphQL query with aliases
+var data = client.query(`
+  query {
+    videoGames {
+      id
+      label: name
+      data: followers
+    }
+  }`);
+  
+// Convert to chartjs format using graphql2chartjs
+convert = require('graphql2chartjs').convert;
+var chartData = convert(data);
 
-*Made with love by [Hasura](https://hasura.io)*
+// Build your chart!
+myChart = new Chart(ctx, {
+  type: 'bar',
+  data: chartData
+}); 
+```
+
 
 ## Contents
 
 - [Demo](#demo)
 - [Realtime](#realtime)
-- [Getting started](#quickstart-with-react)
+- [Getting started](#quick-start-with-react)
 - [How it works](#how-it-works)
     + [Motivation](#motivation)
     + [GraphQL Aliasing](#graphql-aliasing)
@@ -27,8 +46,8 @@ Check out the live demo [here](https://graphql2chartjs-examples.herokuapp.com).
     + [Radar](#radar)
     + [Pie](#pie)
     + [Doughnut](#doughnut)
-    + [Bubble](#bubble-multiple-datasets)
-    + [Scatter](#scatter-multiple-datasets)
+    + [Bubble](#bubble)
+    + [Scatter](#scatter)
 - [Limitations](#limitations)
 
 ## Demo
@@ -810,9 +829,9 @@ var myChart = new Chart(ctx, {
 
 ## Limitations
 
-1. The response structure of your GraphQL query is opinionated. This is however not a limitation as you use GraphQL aliasing to rename the fields to achieve the required structure.
+1. The response structure of your GraphQL query is opinionated. This is however not a limitation as you use GraphQL aliasing to renaeme the fields to achieve the required structure.
 
-2. GraphQL spec for subscriptions allows subscribing to just one root field. This doesn't allow for having multiple datasets in the chart. The workaround for this is to open multiple subscriptions, form a custom GraphQL response from the subscription responses and then pass the response to the convert function.
+2. GraphQL spec for subscriptions allows subscribing to just one root field. This doesn't allow for having multiple datasets in the chart. The workaround for this is to open multiple subscriptions and form a custom GraphQL response from the subscription responses.
 
 ---
 *Only sample data has been used in this readme and any resemblance to reality is purely coincidental*
