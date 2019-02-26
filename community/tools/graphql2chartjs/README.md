@@ -2,11 +2,20 @@
 
 A tool to restructure your GraphQL query's response data as per the [ChartJS](https://chartjs.org) API, so that all it takes to build a chart is a simple GraphQL query.
 
-**Check out the live demo: [https://graphql2chartjs-examples.herokuapp.com](https://graphql2chartjs-examples.herokuapp.com).**
+## Demos & try it out:
+- Live demo: [https://graphql2chartjs-examples.herokuapp.com](https://graphql2chartjs-examples.herokuapp.com)
+- Vanilla JS: [codesandbox.io/vanilla]
+- React: [codesandbox.io/react]
+- Angular: [codesandbox.io/angular]
+- Vue: [codesandbox.io/vue]
+
 
 ## Sample usage
 
 ```javascript
+import 'graphql2chartjs';
+import {Chart} from 'chartjs';
+
 // Run a GraphQL query with aliases
 var data = client.query(`
   query {
@@ -18,28 +27,25 @@ var data = client.query(`
   }`);
   
 // Convert to chartjs format using graphql2chartjs
-convert = require('graphql2chartjs').convert;
-var chartData = convert(data);
+var chartData = graphql2chartjs(data);
 
 // Build your chart!
 myChart = new Chart(ctx, {
   type: 'bar',
   data: chartData
 }); 
+
+// Display the chart
+body.setInnerHTML(mychart);
 ```
 
+[bar-chart](https://i.imgur.com/ldd1LGQ.png)!
 
 ## Contents
 
 - [Demo](#demo)
 - [Realtime](#realtime)
 - [Getting started](#quick-start-with-react)
-- [How it works](#how-it-works)
-    + [Motivation](#motivation)
-    + [GraphQL Aliasing](#graphql-aliasing)
-    + [ChartJS API](#chartjs-api)
-    + [The convert function](#the-convert-function)
-    + [How the restructuring works](#how-the-restructuring-works)
 - [Reference examples](#reference-examples)
     + [Bar](#bar)
     + [Line](#line)
@@ -48,6 +54,12 @@ myChart = new Chart(ctx, {
     + [Doughnut](#doughnut)
     + [Bubble](#bubble)
     + [Scatter](#scatter)
+ - [How it works](#how-it-works)
+    + [Motivation](#motivation)
+    + [GraphQL Aliasing](#graphql-aliasing)
+    + [ChartJS API](#chartjs-api)
+    + [The convert function](#the-convert-function)
+    + [How the restructuring works](#how-the-restructuring-works)
 - [Limitations](#limitations)
 
 ## Demo
