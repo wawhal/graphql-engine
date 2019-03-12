@@ -158,12 +158,13 @@ data TableDiff
   -- used for generating types on_conflict clauses
   -- TODO: this ideally should't be part of TableDiff
   , _tdUniqOrPriCons   :: ![TableConstraint]
+  , _tdPrimaryKeyCols  :: ![PGCol]
   } deriving (Show, Eq)
 
 getTableDiff :: TableMeta -> TableMeta -> TableDiff
 getTableDiff oldtm newtm =
   TableDiff mNewName droppedCols addedCols alteredCols
-  droppedFKeyConstraints uniqueOrPrimaryCons
+  droppedFKeyConstraints uniqueOrPrimaryCons pkeyCols
   where
     mNewName = bool (Just $ tmTable newtm) Nothing $ tmTable oldtm == tmTable newtm
     oldCols = tmColumns oldtm
@@ -173,6 +174,8 @@ getTableDiff oldtm newtm =
       [ TableConstraint (cmType cm) (cmName cm) (cmCols cm)
         | cm <- tmConstraints newtm, isUniqueOrPrimary (cmType cm)
       ]
+
+    pkeyCols = getAllPkeyCols uniqueOrPrimaryCons
 
     droppedCols =
       map pcmColumnName $ getDifference pcmOrdinalPosition oldCols newCols
@@ -208,7 +211,7 @@ getTableChangeDeps ti tableDiff = do
   return $ droppedConsDeps <> droppedColDeps
   where
     tn = tiName ti
-    TableDiff _ droppedCols _ _ droppedFKeyConstraints _ = tableDiff
+    TableDiff _ droppedCols _ _ droppedFKeyConstraints _ _ = tableDiff
 
 data SchemaDiff
   = SchemaDiff

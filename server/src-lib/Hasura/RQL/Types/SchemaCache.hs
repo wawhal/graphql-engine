@@ -8,6 +8,7 @@ module Hasura.RQL.Types.SchemaCache
        , TableInfo(..)
        , TableConstraint(..)
        , getUniqCols
+       , getAllPkeyCols
        , ConstraintType(..)
        , ViewInfo(..)
        , isMutable
