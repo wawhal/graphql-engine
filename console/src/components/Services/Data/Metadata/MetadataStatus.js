@@ -1,25 +1,48 @@
 import React from 'react';
 import Button from '../../../Common/Button/Button';
 import { dropInconsistentObjects } from './Actions';
-
+const styles = require('./Metadata.scss');
 const MetadataStatus = ({ dispatch, metaDataStyles, support, metadata }) => {
-  if (!support) {
-    return null;
-  }
+
+  // if (!support) {
+    // return null;
+  // }
 
   const inconsistentObjectsTable = () => {
     return (
-      <table id="t01">
+      <table className={styles.metadataStatusTable} id="t01">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Definition</th>
+            <th>Dependent objects</th>
+          </tr>
+        </thead>
         <tbody>
           <tr>
-            <th>Firstname</th>
-            <th>Lastname</th>
-            <th>Age</th>
+            <td>author</td>
+            <td>object relationship</td>
+            <td>article:author_id -> author:id</td>
+            <td>some tree</td>
           </tr>
           <tr>
-            <td>Eve</td>
-            <td>Jackson</td>
-            <td>94</td>
+            <td>author</td>
+            <td>object relationship</td>
+            <td>article:author_id -> author:id</td>
+            <td>some tree</td>
+          </tr>
+          <tr>
+            <td>author</td>
+            <td>object relationship</td>
+            <td>article:author_id -> author:id</td>
+            <td>some tree</td>
+          </tr>
+          <tr>
+            <td>author</td>
+            <td>object relationship</td>
+            <td>article:author_id -> author:id</td>
+            <td>some tree</td>
           </tr>
         </tbody>
       </table>
@@ -36,7 +59,7 @@ const MetadataStatus = ({ dispatch, metaDataStyles, support, metadata }) => {
   };
 
   const content = () => {
-    if (metadata.inconsistentObjects.length === 0) {
+    if (metadata.inconsistentObjects.length !== 0) {
       return (
         <div className={metaDataStyles.content_width}>
           GraphQL Engine metadata is consistent with Postgres
