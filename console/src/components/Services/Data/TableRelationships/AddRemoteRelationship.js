@@ -1,106 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import ExpandableEditor from '../../../Common/Layout/ExpandableEditor/Editor';
-import Endpoints from '../../../../Endpoints';
-import requestAction from '../../../../utils/requestAction';
 import styles from '../TableModify/ModifyTable.scss';
+import {
+  useRemoteSchemasEdit,
+  //  useRemoteSchemas,
+} from './remoteRelationshipUtils';
 
-const loadRemoteSchemasQuery = {
-  type: 'get_remote_schema_info',
-  args: {},
+const schemaInfo = {
+  hasura: [
+    {
+      ty: '__Type',
+      name: '__type',
+    },
+    {
+      ty: 'String!',
+      name: '__typename',
+      desc: 'The name of the current Object type at runtime',
+    },
+    {
+      ty: '__Schema!',
+      name: '__schema',
+    },
+  ],
+  mah_schema: [
+    {
+      ty: 'Hello',
+      name: 'hello',
+      input: [{ name: 'some' }, { name: 'wohoo' }],
+      fields: [],
+      desc: 'Lolz',
+    },
+  ],
 };
 
-const loadRemoteSchemas = cb => {
-  return (dispatch, getState) => {
-    return dispatch(
-      requestAction(Endpoints.query, {
-        method: 'POST',
-        body: JSON.stringify(loadRemoteSchemasQuery),
-      })
-    ).then(
-      data => {
-        cb({
-          schemas: data,
-        });
-      },
-      error => {
-        cb({
-          error: error,
-        });
-      }
-    );
-  };
-};
-
-const useRemoteSchemas = (dispatch, reset) => {
-  const [remoteSchemas, setRemoteSchemas] = useState({});
-  useEffect(() => {
-    dispatch(loadRemoteSchemas, r => setRemoteSchemas(r));
-  }, []);
-  return remoteSchemas;
-};
-
-const useRemoteSchemasEdit = () => {
-  const [rsState, setRsState] = useState({
-    schemaName: '',
-    fieldName: '',
-    relFrom: '',
-    relTo: '',
-  });
-
-  const { schemaName, fieldName, inputField, tableColumn } = rsState;
-
-  const setSchemaName = e => {
-    setRsState({
-      ...rsState,
-      schemaName: e.target.value,
-    });
-  };
-  const setFieldName = e => {
-    setRsState({
-      ...rsState,
-      fieldName: e.target.value,
-    });
-  };
-  const setInputField = e => {
-    setRsState({
-      ...rsState,
-      relFrom: e.target.value,
-    });
-  };
-  const setTableColumn = e => {
-    setRsState({
-      ...rsState,
-      relTo: e.target.value,
-    });
-  };
-  return {
-    schemaName,
-    setSchemaName,
-    fieldName,
-    setFieldName,
-    inputField,
-    setInputField,
-    tableColumn,
-    setTableColumn,
-  };
-};
-
-const AddRemoteRelationship = ({ dispatch }) => {
-  const schemaInfo = useRemoteSchemas(dispatch).schemas || {};
+const AddRemoteRelationship = ({ tableSchema }) => {
+  // const schemaInfo = useRemoteSchemas(dispatch).schemas || {};
   const {
     schemaName,
     setSchemaName,
-    fieldName,
-    setFieldName,
+    fieldNamePath,
+    setFieldNamePath,
     inputField,
     setInputField,
     tableColumn,
     setTableColumn,
   } = useRemoteSchemasEdit();
   const remoteSchemas = Object.keys(schemaInfo).filter(s => s !== 'hasura');
-  const types = ['type1', 'type2'];
-  const inputFields = ['if1', 'if2'];
-  const columns = ['col1', 'col2'];
+  let fields = [];
+  if (schemaName && schemaInfo[schemaName]) {
+    fields = schemaInfo[schemaName]
+      ? schemaInfo[schemaName].map(f => f.name)
+      : [];
+  }
+  let inputFields = [];
+  if (fieldNamePath.length > 0) {
+    const field = schemaInfo[schemaName].find(f => f.name === fieldNamePath[0]);
+    if (field) {
+      inputFields = field.input.map(f => f.name);
+    }
+  }
+
+  const setFieldNameInFieldPath = (name, i = 0) => {
+    if (i === 0) {
+      setFieldNamePath([name]);
+    } else {
+      setFieldNamePath([...fieldNamePath.slice(0, i - 1), name]);
+    }
+  };
+
+  const columns = tableSchema.columns.map(c => c.column_name);
   const expanded = () => {
     return (
       <div>
@@ -134,13 +102,13 @@ const AddRemoteRelationship = ({ dispatch }) => {
           <div>
             <select
               className={`form-control ${styles.wd150px}`}
-              defaultValue=""
-              onChange={setFieldName}
+              value={fieldNamePath[0] || ''}
+              onChange={e => setFieldNameInFieldPath(e.target.value)}
             >
               <option key="empty_key" value="" disabled>
                 -- field type --
               </option>
-              {types.map(t => {
+              {fields.map(t => {
                 return (
                   <option key={t} value={t}>
                     {t}
@@ -158,7 +126,7 @@ const AddRemoteRelationship = ({ dispatch }) => {
             <div className={`col-md-3 ${styles.add_mar_right}`}>
               <select
                 className={`form-control ${styles.wd150px}`}
-                defaultValue=""
+                value={inputField || ''}
                 onChange={setInputField}
               >
                 <option key="select_type" value="" disabled>
@@ -176,7 +144,7 @@ const AddRemoteRelationship = ({ dispatch }) => {
             <div className={'col-md-6'}>
               <select
                 className={`form-control ${styles.wd150px}`}
-                defaultValue=""
+                value={tableColumn || ''}
                 onChange={setTableColumn}
               >
                 <option key="select_type" value="">
