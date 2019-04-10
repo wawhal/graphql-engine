@@ -515,7 +515,7 @@ class Relationships extends Component {
               <Button
                 type="submit"
                 color="white"
-                size="sm"
+                size="xs"
                 onClick={() => {
                   dispatch(relManualAddClicked());
                 }}
