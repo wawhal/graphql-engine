@@ -525,7 +525,7 @@ class Relationships extends Component {
               </Button>
             )}
             <hr />
-            <AddRemoteRelationship />
+            <AddRemoteRelationship dispatch={dispatch} />
           </div>
         </div>
         <div className={`${styles.fixed} hidden`}>{alert}</div>

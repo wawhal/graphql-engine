@@ -1,9 +1,103 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ExpandableEditor from '../../../Common/Layout/ExpandableEditor/Editor';
+import Endpoints from '../../../../Endpoints';
+import requestAction from '../../../../utils/requestAction';
 import styles from '../TableModify/ModifyTable.scss';
 
-const AddRemoteRelationship = () => {
-  const remoteSchemas = ['schema1', 'schema2'];
+const loadRemoteSchemasQuery = {
+  type: 'get_remote_schema_info',
+  args: {},
+};
+
+const loadRemoteSchemas = cb => {
+  return (dispatch, getState) => {
+    return dispatch(
+      requestAction(Endpoints.query, {
+        method: 'POST',
+        body: JSON.stringify(loadRemoteSchemasQuery),
+      })
+    ).then(
+      data => {
+        cb({
+          schemas: data,
+        });
+      },
+      error => {
+        cb({
+          error: error,
+        });
+      }
+    );
+  };
+};
+
+const useRemoteSchemas = (dispatch, reset) => {
+  const [remoteSchemas, setRemoteSchemas] = useState({});
+  useEffect(() => {
+    dispatch(loadRemoteSchemas, r => setRemoteSchemas(r));
+  }, []);
+  return remoteSchemas;
+};
+
+const useRemoteSchemasEdit = () => {
+  const [rsState, setRsState] = useState({
+    schemaName: '',
+    fieldName: '',
+    relFrom: '',
+    relTo: '',
+  });
+
+  const { schemaName, fieldName, inputField, tableColumn } = rsState;
+
+  const setSchemaName = e => {
+    setRsState({
+      ...rsState,
+      schemaName: e.target.value,
+    });
+  };
+  const setFieldName = e => {
+    setRsState({
+      ...rsState,
+      fieldName: e.target.value,
+    });
+  };
+  const setInputField = e => {
+    setRsState({
+      ...rsState,
+      relFrom: e.target.value,
+    });
+  };
+  const setTableColumn = e => {
+    setRsState({
+      ...rsState,
+      relTo: e.target.value,
+    });
+  };
+  return {
+    schemaName,
+    setSchemaName,
+    fieldName,
+    setFieldName,
+    inputField,
+    setInputField,
+    tableColumn,
+    setTableColumn,
+  };
+};
+
+const AddRemoteRelationship = ({ dispatch }) => {
+  const schemaInfo = useRemoteSchemas(dispatch).schemas || {};
+  const {
+    schemaName,
+    setSchemaName,
+    fieldName,
+    setFieldName,
+    inputField,
+    setInputField,
+    tableColumn,
+    setTableColumn,
+  } = useRemoteSchemasEdit();
+  const remoteSchemas = Object.keys(schemaInfo).filter(s => s !== 'hasura');
   const types = ['type1', 'type2'];
   const inputFields = ['if1', 'if2'];
   const columns = ['col1', 'col2'];
@@ -18,6 +112,7 @@ const AddRemoteRelationship = () => {
             <select
               className={`form-control ${styles.wd150px}`}
               defaultValue=""
+              onChange={setSchemaName}
             >
               <option key="empty_key" value="" disabled>
                 -- remote schema --
@@ -40,6 +135,7 @@ const AddRemoteRelationship = () => {
             <select
               className={`form-control ${styles.wd150px}`}
               defaultValue=""
+              onChange={setFieldName}
             >
               <option key="empty_key" value="" disabled>
                 -- field type --
@@ -63,6 +159,7 @@ const AddRemoteRelationship = () => {
               <select
                 className={`form-control ${styles.wd150px}`}
                 defaultValue=""
+                onChange={setInputField}
               >
                 <option key="select_type" value="" disabled>
                   -- input field --
@@ -80,6 +177,7 @@ const AddRemoteRelationship = () => {
               <select
                 className={`form-control ${styles.wd150px}`}
                 defaultValue=""
+                onChange={setTableColumn}
               >
                 <option key="select_type" value="">
                   -- table column --
