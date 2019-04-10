@@ -20,6 +20,7 @@ import { getRelDef, getObjArrRelList } from './utils';
 
 import Button from '../../../Common/Button/Button';
 import AddManualRelationship from './AddManualRelationship';
+import AddRemoteRelationship from './AddRemoteRelationship';
 import suggestedRelationshipsRaw from './autoRelations';
 import RelationshipEditor from './RelationshipEditor';
 import semverCheck from '../../../../helpers/semver';
@@ -524,6 +525,7 @@ class Relationships extends Component {
               </Button>
             )}
             <hr />
+            <AddRemoteRelationship />
           </div>
         </div>
         <div className={`${styles.fixed} hidden`}>{alert}</div>
