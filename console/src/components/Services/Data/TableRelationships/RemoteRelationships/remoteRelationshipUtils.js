@@ -129,6 +129,7 @@ export const useRemoteSchemasEdit = () => {
     fieldNamePath: [],
     inputField: '',
     tableColumn: '',
+    nested: false,
   };
   const [rsState, setRsState] = useState(defaultState);
 
@@ -138,6 +139,7 @@ export const useRemoteSchemasEdit = () => {
     fieldNamePath,
     inputField,
     tableColumn,
+    nested,
   } = rsState;
   const setRelName = e => {
     setRsState({
@@ -173,6 +175,15 @@ export const useRemoteSchemasEdit = () => {
     });
   };
 
+  const setNested = value => {
+    const fnp = rsState.fieldNamePath;
+    setRsState({
+      ...rsState,
+      fieldNamePath: fnp[0] ? [fnp[0]] : [],
+      nested: value,
+    });
+  };
+
   const reset = () => {
     setRsState({
       ...defaultState,
@@ -191,6 +202,8 @@ export const useRemoteSchemasEdit = () => {
     tableColumn,
     setTableColumn,
     reset,
+    nested,
+    setNested,
   };
 };
 

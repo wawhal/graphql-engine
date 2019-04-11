@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ExpandableEditor from '../../../../Common/Layout/ExpandableEditor/Editor';
 import styles from '../../TableModify/ModifyTable.scss';
 import { showErrorNotification } from '../../Notification';
@@ -22,8 +22,9 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
     tableColumn,
     setTableColumn,
     reset,
+    nested,
+    setNested,
   } = useRemoteSchemasEdit();
-  const [nested, setNested] = useState(false);
   const remoteSchemas = schemaInfo
     .filter(s => s.schema_name !== 'hasura')
     .map(s => s.schema_name);
@@ -92,14 +93,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
               styles.add_mar_top_small
             } ${styles.padd_right_remove}`}
           >
-            <div
-              style={{
-                backgroundColor: '#4D4D4D',
-                borderRadius: '5px',
-                height: '5px',
-                width: '5px',
-              }}
-            />
+            <b>.</b>
           </div>
         );
         nestingDropdown = (
@@ -129,7 +123,6 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
             } ${styles.add_mar_top_small}`}
             onClick={() => {
               setNested(false);
-              setFieldNamePath([fieldNamePath[0]]);
             }}
           >
             <i className="fa fa-times" />
@@ -286,6 +279,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
         tableColumn,
         () => {
           reset();
+          setNested(false);
           toggle();
         }
       )
@@ -301,7 +295,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
         property="remote-add"
         collapseButtonText="Cancel"
         saveFunc={saveFunc}
-        collapseAfterSave
+        collapseCallback={reset}
       />
     </div>
   );
