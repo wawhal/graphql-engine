@@ -773,7 +773,6 @@ class Permissions extends Component {
                   queryLabel
                 )
               );
-
               if (isSelected) {
                 _filterOptionsSection.push(selectedValue);
               }
@@ -950,9 +949,17 @@ class Permissions extends Component {
 
           tableSchema.columns.forEach((colObj, i) => {
             const column = colObj.column_name;
-            const checked = permissionsState[query]
-              ? permissionsState[query].columns.includes(column)
-              : false;
+
+            let checked;
+            if (permissionsState[query]) {
+              if (permissionsState[query].columns === '*') {
+                checked = true;
+              } else {
+                checked = permissionsState[query].columns.includes(column);
+              }
+            } else {
+              checked = false;
+            }
 
             _columnList.push(
               <div key={i} className={styles.columnListElement}>
@@ -1051,8 +1058,9 @@ class Permissions extends Component {
           ) {
             colSectionStatus = 'no columns';
           } else if (
+            permissionsState[query].columns === '*' ||
             permissionsState[query].columns.length ===
-            tableSchema.columns.length
+              tableSchema.columns.length
           ) {
             colSectionStatus = 'all columns';
           } else {
@@ -1413,7 +1421,6 @@ class Permissions extends Component {
             let _deleteBtn;
 
             const presetType = getPresetValueType(preset);
-
             if (presetType) {
               _deleteBtn = (
                 <i
@@ -1423,7 +1430,6 @@ class Permissions extends Component {
                 />
               );
             }
-
             return _deleteBtn;
           };
 

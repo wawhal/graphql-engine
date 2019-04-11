@@ -492,6 +492,7 @@ class Relationships extends Component {
                 + Add relationship
               </Button>
             )}
+            <hr />
             {relAdd.isManualExpanded ? (
               <div className={styles.activeEdit}>
                 <AddManualRelationship
