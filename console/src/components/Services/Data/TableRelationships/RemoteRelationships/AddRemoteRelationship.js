@@ -46,7 +46,7 @@ const AddRemoteRelationship = ({ tableSchema }) => {
     setInputField,
     tableColumn,
     setTableColumn,
-    reset
+    reset,
   } = useRemoteSchemasEdit();
   const remoteSchemas = Object.keys(schemaInfo).filter(s => s !== 'hasura');
   let fields = [];
@@ -83,7 +83,7 @@ const AddRemoteRelationship = ({ tableSchema }) => {
             <input
               className={`form-control ${styles.wd150px}`}
               type="text"
-              placeholder="-- relationship name ---"
+              placeholder="name"
               onChange={setRelName}
             />
           </div>
@@ -138,8 +138,12 @@ const AddRemoteRelationship = ({ tableSchema }) => {
           <div className={`${styles.add_mar_bottom_mid}`}>
             <b>Mapping</b>
           </div>
+          <div className={`row ${styles.add_mar_bottom_small}`}>
+            <div className="col-md-3">Argument</div>
+            <div className="col-md-6">Table column</div>
+          </div>
           <div className={'row'}>
-            <div className={`col-md-3 ${styles.add_mar_right}`}>
+            <div className={`col-md-3`}>
               <select
                 className={`form-control ${styles.wd150px}`}
                 value={inputField || ''}
@@ -188,6 +192,8 @@ const AddRemoteRelationship = ({ tableSchema }) => {
       <ExpandableEditor
         expandButtonText={expandButtonText}
         editorExpanded={expanded}
+        service="relationships"
+        property="remote-add"
         collapseButtonText="Cancel"
         saveFunc={saveFunc}
       />

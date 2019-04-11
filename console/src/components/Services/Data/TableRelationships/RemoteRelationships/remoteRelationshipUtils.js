@@ -48,12 +48,18 @@ export const useRemoteSchemasEdit = () => {
   };
   const [rsState, setRsState] = useState(defaultState);
 
-  const { relName, schemaName, fieldNamePath, inputField, tableColumn } = rsState;
+  const {
+    relName,
+    schemaName,
+    fieldNamePath,
+    inputField,
+    tableColumn,
+  } = rsState;
   const setRelName = e => {
     setRsState({
       ...rsState,
-      relName: e.target.value
-    })
+      relName: e.target.value,
+    });
   };
   const setSchemaName = e => {
     setRsState({
@@ -84,9 +90,9 @@ export const useRemoteSchemasEdit = () => {
 
   const reset = () => {
     setRsState({
-      ...defaultState
+      ...defaultState,
     });
-  }
+  };
 
   return {
     relName,
@@ -99,6 +105,6 @@ export const useRemoteSchemasEdit = () => {
     setInputField,
     tableColumn,
     setTableColumn,
-    reset
+    reset,
   };
 };
