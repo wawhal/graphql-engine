@@ -258,7 +258,12 @@ export const saveRemoteRelQuery = (
         if (errorCb) {
           errorCb();
         }
-        dispatch(showErrorNotification('Failed creating remote relationship'));
+        dispatch(
+          showErrorNotification(
+            'Failed creating remote relationship',
+            err.error
+          )
+        );
       }
     );
   };
@@ -289,7 +294,9 @@ export const deleteRemoteRelationship = (tableSchema, name) => {
       },
       e => {
         console.error(e);
-        dispatch(showErrorNotification('Failed deleting remote relationship'));
+        dispatch(
+          showErrorNotification('Failed deleting remote relationship', e.error)
+        );
       }
     );
   };

@@ -51,7 +51,10 @@ const ListRemoteRelationships = props => {
     const expandButtonText = 'View';
 
     const removeFunc = () => {
-      dispatch(deleteRemoteRelationship(tableSchema, rel_name));
+      const isOk = window.confirm('Are you sure?');
+      if (isOk) {
+        dispatch(deleteRemoteRelationship(tableSchema, rel_name));
+      }
     };
 
     return (
