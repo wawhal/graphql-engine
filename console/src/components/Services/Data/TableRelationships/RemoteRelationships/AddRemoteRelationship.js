@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ExpandableEditor from '../../../../Common/Layout/ExpandableEditor/Editor';
 import styles from '../../TableModify/ModifyTable.scss';
 import { showErrorNotification } from '../../Notification';
@@ -23,6 +23,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
     setTableColumn,
     reset,
   } = useRemoteSchemasEdit();
+  const [nested, setNested] = useState(false);
   const remoteSchemas = schemaInfo
     .filter(s => s.schema_name !== 'hasura')
     .map(s => s.schema_name);
@@ -33,13 +34,21 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
     schema = schemaInfo.find(s => s.schema_name === schemaName);
     fields = schema.fields.map(f => f.name);
   }
+
+  let selectedField;
+  let hasChildren;
   let inputFields = [];
-  if (fieldNamePath.length > 0) {
-    const field = schema.fields.find(f => f.name === fieldNamePath[0]);
-    if (field) {
-      inputFields = Object.keys(field.input_types);
+  let childrenFields = [];
+  const fieldPathLength = fieldNamePath.length;
+  if (fieldPathLength > 0) {
+    selectedField = fieldNamePath[0];
+    parentField = schema.fields.find(f => f.name === fieldNamePath[0]) 
+    if (parentField.fields.length > 0) {
+      hasChildren = true;
+      childrenFields = parentField.fields.map(f => f.name);
     }
   }
+
 
   const setFieldNameInFieldPath = (name, i = 0) => {
     if (i === 0) {
@@ -51,6 +60,55 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
 
   const columns = tableSchema.columns.map(c => c.column_name);
   const expanded = () => {
+
+    const getNestedOptions = () => {
+      let addNestingButton = null;
+      let nestingDropdown = null;
+      let removeNestingButton = null;
+      if (hasChildren) {
+        addNestingButton = (
+          <div className={`col-md-1 ${styles.cursorPointer}`} onClick={() => setNested(true)}>
+            <i className="fa fa-plus"></i>
+          </div>
+        )
+      }
+      if (nested && hasChildren) {
+        addNestingButton = (
+          <div className={`col-md-1`}>
+            <i className="fa fa-arrow-right"></i>
+          </div>
+        );
+        nestingDropdown = (
+          <div className="col-md-3">
+            <select
+              className={`form-control ${styles.wd150px}`}
+              value={fieldNamePath[1] || ''}
+              onChange={e => setFieldNameInFieldPath(e.target.value, 1)}
+            >
+              <option key="empty_key" value="" disabled>
+                -- nested field --
+              </option>
+              {childrenFields.map(t => {
+                return (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        );
+        removeNestingButton = (
+          <div className={`col-md-1 ${styles.cursorPointer}`} onClick={() => setNested(false)}>
+            <i className="fa fa-times"></i>
+          </div>
+        )
+      }
+      return (
+        [addNestingButton, nestingDropdown, removeNestingButton]
+      );
+    }
+
     return (
       <div>
         <div className={`${styles.add_mar_bottom}`}>
@@ -93,25 +151,28 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
           <div className={`${styles.add_mar_bottom_mid}`}>
             <b>Field name</b>
           </div>
-          <div>
-            <select
-              className={`form-control ${styles.wd150px}`}
-              value={fieldNamePath[0] || ''}
-              onChange={e => setFieldNameInFieldPath(e.target.value)}
-              title={!schemaName ? 'Select remote schema first' : undefined}
-              disabled={!schemaName}
-            >
-              <option key="empty_key" value="" disabled>
-                -- field name --
-              </option>
-              {fields.map(t => {
-                return (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                );
-              })}
-            </select>
+          <div className={`row`}>
+            <div className={`col-md-3`}>
+              <select
+                className={`form-control ${styles.wd150px}`}
+                value={selectedField || ''}
+                onChange={e => setFieldNameInFieldPath(e.target.value)}
+                title={!schemaName ? 'Select remote schema first' : undefined}
+                disabled={!schemaName}
+              >
+                <option key="empty_key" value="" disabled>
+                  -- field name --
+                </option>
+                {fields.map(t => {
+                  return (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  );
+                })}
+              </select>
+              {getNestedOptions()}
+            </div>
           </div>
         </div>
         <div className={`${styles.add_mar_bottom}`}>
@@ -143,7 +204,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
                 })}
               </select>
             </div>
-            <div className={'col-md-6'}>
+            <div className={'col-md-3'}>
               <select
                 className={`form-control ${styles.wd150px}`}
                 value={tableColumn || ''}
@@ -181,7 +242,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
       saveRemoteRelQuery(
         relName,
         tableSchema.table_name,
-        fieldNamePath[0],
+        selectedField,
         inputField,
         tableColumn,
         reset

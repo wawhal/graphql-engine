@@ -1256,6 +1256,10 @@ code {
   width: 150px;
 }
 
+.cursorPointer {
+  cursor: pointer;
+}
+
 /* container height subtracting top header and bottom scroll bar */
 $mainContainerHeight: calc(100vh - 50px - 25px);
 
