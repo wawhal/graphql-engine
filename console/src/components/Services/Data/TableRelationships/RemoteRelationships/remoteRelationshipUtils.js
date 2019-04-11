@@ -67,6 +67,9 @@ const generateCreateRemoteRelationshipQuery = (
       },
     },
   };
+  if (isNameSpaced) {
+    query.args.using.namespace = fieldNamePath[0];
+  }
   return query;
 };
 
@@ -105,7 +108,7 @@ const loadRemoteSchemas = cb => {
         });
       },
       error => {
-        console.log(error);
+        console.error(error);
         cb({
           error: error,
         });
@@ -283,7 +286,10 @@ export const saveRemoteRelQuery = (
 };
 
 export const getRemoteRelDef = relDef => {
-  const { table, column, input_field, remote_field } = relDef;
+  const { table, column, input_field, remote_field, namespace } = relDef;
+  if (namespace) {
+    return ` ${table} . ${column} → ${namespace} { ${remote_field} ( ${input_field} ) }`;
+  }
   return ` ${table} . ${column} → ${remote_field} ( ${input_field} )`;
 };
 

@@ -106,7 +106,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
               <option key="empty_key" value="" disabled>
                 -- nested field --
               </option>
-              {childrenFields.map(t => {
+              {childrenFields.sort().map(t => {
                 return (
                   <option key={t} value={t}>
                     {t}
@@ -161,7 +161,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
               <option key="empty_key" value="" disabled>
                 -- remote schema --
               </option>
-              {remoteSchemas.map(rs => {
+              {remoteSchemas.sort().map(rs => {
                 return (
                   <option key={rs} value={rs}>
                     {rs}
@@ -187,7 +187,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
                 <option key="empty_key" value="" disabled>
                   -- field name --
                 </option>
-                {fields.map(t => {
+                {fields.sort().map(t => {
                   return (
                     <option key={t} value={t}>
                       {t}
@@ -220,7 +220,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
                 <option key="select_type" value="">
                   -- table column --
                 </option>
-                {columns.map(c => {
+                {columns.sort().map(c => {
                   return (
                     <option key={c} value={c}>
                       {c}
@@ -251,7 +251,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
                 <option key="select_type" value="" disabled>
                   -- input field --
                 </option>
-                {inputFields.map(inpF => {
+                {inputFields.sort().map(inpF => {
                   return (
                     <option key={inpF} value={inpF}>
                       {inpF}
