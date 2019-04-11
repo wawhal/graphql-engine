@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import Endpoints from '../../../../Endpoints';
-import requestAction from '../../../../utils/requestAction';
+import Endpoints from '../../../../../Endpoints';
+import requestAction from '../../../../../utils/requestAction';
 
 const loadRemoteSchemasQuery = {
   type: 'get_remote_schema_info',
@@ -40,6 +40,7 @@ export const useRemoteSchemas = dispatch => {
 
 export const useRemoteSchemasEdit = () => {
   const defaultState = {
+    relName: '',
     schemaName: '',
     fieldNamePath: [],
     inputField: '',
@@ -47,7 +48,13 @@ export const useRemoteSchemasEdit = () => {
   };
   const [rsState, setRsState] = useState(defaultState);
 
-  const { schemaName, fieldNamePath, inputField, tableColumn } = rsState;
+  const { relName, schemaName, fieldNamePath, inputField, tableColumn } = rsState;
+  const setRelName = e => {
+    setRsState({
+      ...rsState,
+      relName: e.target.value
+    })
+  };
   const setSchemaName = e => {
     setRsState({
       ...defaultState,
@@ -74,7 +81,16 @@ export const useRemoteSchemasEdit = () => {
       tableColumn: e.target.value,
     });
   };
+
+  const reset = () => {
+    setRsState({
+      ...defaultState
+    });
+  }
+
   return {
+    relName,
+    setRelName,
     schemaName,
     setSchemaName,
     fieldNamePath,
@@ -83,5 +99,6 @@ export const useRemoteSchemasEdit = () => {
     setInputField,
     tableColumn,
     setTableColumn,
+    reset
   };
 };

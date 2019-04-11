@@ -1,6 +1,6 @@
 import React from 'react';
-import ExpandableEditor from '../../../Common/Layout/ExpandableEditor/Editor';
-import styles from '../TableModify/ModifyTable.scss';
+import ExpandableEditor from '../../../../Common/Layout/ExpandableEditor/Editor';
+import styles from '../../TableModify/ModifyTable.scss';
 import {
   useRemoteSchemasEdit,
   //  useRemoteSchemas,
@@ -36,6 +36,8 @@ const schemaInfo = {
 const AddRemoteRelationship = ({ tableSchema }) => {
   // const schemaInfo = useRemoteSchemas(dispatch).schemas || {};
   const {
+    relName,
+    setRelName,
     schemaName,
     setSchemaName,
     fieldNamePath,
@@ -44,6 +46,7 @@ const AddRemoteRelationship = ({ tableSchema }) => {
     setInputField,
     tableColumn,
     setTableColumn,
+    reset
   } = useRemoteSchemasEdit();
   const remoteSchemas = Object.keys(schemaInfo).filter(s => s !== 'hasura');
   let fields = [];
@@ -72,6 +75,19 @@ const AddRemoteRelationship = ({ tableSchema }) => {
   const expanded = () => {
     return (
       <div>
+        <div className={`${styles.add_mar_bottom}`}>
+          <div className={`${styles.add_mar_bottom_mid}`}>
+            <b> Relationship name </b>
+          </div>
+          <div>
+            <input
+              className={`form-control ${styles.wd150px}`}
+              type="text"
+              placeholder="-- relationship name ---"
+              onChange={setRelName}
+            />
+          </div>
+        </div>
         <div className={`${styles.add_mar_bottom}`}>
           <div className={`${styles.add_mar_bottom_mid}`}>
             <b> Remote schema </b>
