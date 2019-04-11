@@ -24,6 +24,19 @@ const genLoadRemoteRelationshipsQuery = tableName => {
   };
 };
 
+const genDropRelationship = (tableName, schemaName, relName) => {
+  return {
+    type: 'drop_remote_relationship',
+    args: {
+      table: {
+        name: tableName,
+        schema: schemaName,
+      },
+      name: relName,
+    },
+  };
+};
+
 const loadRemoteSchemasQuery = {
   type: 'get_remote_schema_info',
   args: {},
@@ -32,23 +45,29 @@ const loadRemoteSchemasQuery = {
 const generateCreateRemoteRelationshipQuery = (
   name,
   tableName,
-  fieldName,
+  fieldNamePath,
   inputField,
-  columnName
+  columnName,
+  schemaName,
+  isNameSpaced
 ) => {
-  return {
+  const query = {
     type: 'create_remote_relationship',
     args: {
       name,
-      table: tableName,
+      table: {
+        name: tableName,
+        schema: schemaName,
+      },
       using: {
         table: tableName,
-        remote_field: fieldName,
+        remote_field: isNameSpaced ? fieldNamePath[1] : fieldNamePath[0],
         input_field: inputField,
         column: columnName,
       },
     },
   };
+  return query;
 };
 
 export const loadRemoteRelationships = tableName => {
@@ -177,14 +196,16 @@ export const useRemoteSchemasEdit = () => {
 
 export const saveRemoteRelQuery = (
   name,
-  tableName,
-  fieldName,
+  tableSchema,
+  fieldNamePath,
   inputField,
   columnName,
   successCb,
   errorCb
 ) => {
   return dispatch => {
+    const tableName = tableSchema.table_name;
+    const schemaName = tableSchema.schema_name;
     if (!name) {
       return dispatch(
         showErrorNotification('Relationship name cannot be empty')
@@ -200,7 +221,7 @@ export const saveRemoteRelQuery = (
         )
       );
     }
-    if (!fieldName) {
+    if (fieldNamePath.length === 0) {
       return dispatch(showErrorNotification('Please select a field'));
     }
     if (!inputField) {
@@ -216,14 +237,16 @@ export const saveRemoteRelQuery = (
           generateCreateRemoteRelationshipQuery(
             name,
             tableName,
-            fieldName,
+            fieldNamePath,
             inputField,
-            columnName
+            columnName,
+            schemaName,
+            fieldNamePath.length === 2
           )
         ),
       })
     ).then(
-      data => {
+      () => {
         if (successCb) {
           successCb();
         }
@@ -244,4 +267,30 @@ export const saveRemoteRelQuery = (
 export const getRemoteRelDef = relDef => {
   const { table, column, input_field, remote_field } = relDef;
   return ` ${table} . ${column} → ${remote_field} ( ${input_field} )`;
+};
+
+export const deleteRemoteRelationship = (tableSchema, name) => {
+  return dispatch => {
+    return dispatch(
+      requestAction(Endpoints.query, {
+        method: 'POST',
+        body: JSON.stringify(
+          genDropRelationship(
+            tableSchema.table_name,
+            tableSchema.schema_name,
+            name
+          )
+        ),
+      })
+    ).then(
+      () => {
+        dispatch(loadRemoteRelationships(tableSchema.table_name));
+        dispatch(showSuccessNotification('Remote relationship deleted'));
+      },
+      e => {
+        console.error(e);
+        dispatch(showErrorNotification('Failed deleting remote relationship'));
+      }
+    );
+  };
 };

@@ -384,6 +384,9 @@ input {
 .remove_margin_bottom {
   margin-bottom: 0 !important;
 }
+.remove_margin_right {
+  margin-right: 0 !important;
+}
 
 .remove_margin {
   margin: 0 !important;
@@ -1258,6 +1261,12 @@ code {
 
 .cursorPointer {
   cursor: pointer;
+}
+
+.display_flex_centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* container height subtracting top header and bottom scroll bar */

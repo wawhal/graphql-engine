@@ -42,44 +42,68 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
   const fieldPathLength = fieldNamePath.length;
   if (fieldPathLength > 0) {
     selectedField = fieldNamePath[0];
-    parentField = schema.fields.find(f => f.name === fieldNamePath[0]) 
-    if (parentField.fields.length > 0) {
+    const parentField = schema.fields.find(f => f.name === fieldNamePath[0]);
+    if (parentField.selection_fields.length > 0) {
       hasChildren = true;
-      childrenFields = parentField.fields.map(f => f.name);
+      childrenFields = parentField.selection_fields.map(f => f.name);
+    }
+    if (fieldPathLength === 1) {
+      inputFields = Object.keys(parentField.input_types);
+    } else {
+      const selectedChildField = parentField.selection_fields.find(
+        sf => sf.name === fieldNamePath[1]
+      );
+      inputFields = Object.keys(selectedChildField.input_types);
     }
   }
-
 
   const setFieldNameInFieldPath = (name, i = 0) => {
     if (i === 0) {
       setFieldNamePath([name]);
     } else {
-      setFieldNamePath([...fieldNamePath.slice(0, i - 1), name]);
+      setFieldNamePath([...fieldNamePath.slice(0, i), name]);
     }
   };
 
   const columns = tableSchema.columns.map(c => c.column_name);
   const expanded = () => {
-
     const getNestedOptions = () => {
       let addNestingButton = null;
       let nestingDropdown = null;
       let removeNestingButton = null;
       if (hasChildren) {
         addNestingButton = (
-          <div className={`col-md-1 ${styles.cursorPointer}`} onClick={() => setNested(true)}>
-            <i className="fa fa-plus"></i>
+          <div
+            className={`col-md-1 ${styles.display_flex_centered} ${
+              styles.add_mar_top_small
+            } ${styles.padd_right_remove}`}
+            onClick={() => {
+              setNested(true);
+            }}
+          >
+            <i className={`fa fa-plus ${styles.cursorPointer}`} />
           </div>
-        )
+        );
       }
       if (nested && hasChildren) {
         addNestingButton = (
-          <div className={`col-md-1`}>
-            <i className="fa fa-arrow-right"></i>
+          <div
+            className={`col-md-1 ${styles.display_flex_centered} ${
+              styles.add_mar_top_small
+            } ${styles.padd_right_remove}`}
+          >
+            <div
+              style={{
+                backgroundColor: '#4D4D4D',
+                borderRadius: '5px',
+                height: '5px',
+                width: '5px',
+              }}
+            />
           </div>
         );
         nestingDropdown = (
-          <div className="col-md-3">
+          <div className={`col-md-3 ${styles.padd_right_remove}`}>
             <select
               className={`form-control ${styles.wd150px}`}
               value={fieldNamePath[1] || ''}
@@ -99,15 +123,21 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
           </div>
         );
         removeNestingButton = (
-          <div className={`col-md-1 ${styles.cursorPointer}`} onClick={() => setNested(false)}>
-            <i className="fa fa-times"></i>
+          <div
+            className={`col-md-1 ${styles.cursorPointer} ${
+              styles.display_flex_centered
+            } ${styles.add_mar_top_small}`}
+            onClick={() => {
+              setNested(false);
+              setFieldNamePath([fieldNamePath[0]]);
+            }}
+          >
+            <i className="fa fa-times" />
           </div>
-        )
+        );
       }
-      return (
-        [addNestingButton, nestingDropdown, removeNestingButton]
-      );
-    }
+      return [addNestingButton, nestingDropdown, removeNestingButton];
+    };
 
     return (
       <div>
@@ -120,6 +150,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
               className={`form-control ${styles.wd150px}`}
               type="text"
               placeholder="name"
+              value={relName}
               onChange={setRelName}
             />
           </div>
@@ -131,7 +162,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
           <div>
             <select
               className={`form-control ${styles.wd150px}`}
-              defaultValue=""
+              value={schemaName || ''}
               onChange={setSchemaName}
             >
               <option key="empty_key" value="" disabled>
@@ -151,8 +182,8 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
           <div className={`${styles.add_mar_bottom_mid}`}>
             <b>Field name</b>
           </div>
-          <div className={`row`}>
-            <div className={`col-md-3`}>
+          <div className={'row'}>
+            <div className={'col-md-3'}>
               <select
                 className={`form-control ${styles.wd150px}`}
                 value={selectedField || ''}
@@ -171,39 +202,16 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
                   );
                 })}
               </select>
-              {getNestedOptions()}
             </div>
+            {getNestedOptions()}
           </div>
         </div>
         <div className={`${styles.add_mar_bottom}`}>
           <div className={`${styles.add_mar_bottom_mid}`}>
             <b>Mapping</b>
+            <i> (from table column to input field)</i>
           </div>
           <div className={'row'}>
-            <div className={'col-md-3'}>
-              <select
-                className={`form-control ${styles.wd150px}`}
-                value={inputField || ''}
-                onChange={setInputField}
-                title={
-                  fieldNamePath.length === 0
-                    ? 'Select remote schema and field name first'
-                    : undefined
-                }
-                disabled={fieldNamePath.length === 0}
-              >
-                <option key="select_type" value="" disabled>
-                  -- input field --
-                </option>
-                {inputFields.map(inpF => {
-                  return (
-                    <option key={inpF} value={inpF}>
-                      {inpF}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
             <div className={'col-md-3'}>
               <select
                 className={`form-control ${styles.wd150px}`}
@@ -228,24 +236,58 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
                 })}
               </select>
             </div>
+            <div
+              className={`col-md-1 ${styles.display_flex_centered} ${
+                styles.add_mar_top_small
+              } ${styles.padd_right_remove}`}
+            >
+              <i className="fa fa-arrow-right" />
+            </div>
+            <div className={'col-md-3'}>
+              <select
+                className={`form-control ${styles.wd150px}`}
+                value={inputField || ''}
+                onChange={setInputField}
+                title={
+                  fieldNamePath.length === 0
+                    ? 'Select remote schema and field name first'
+                    : undefined
+                }
+                disabled={fieldNamePath.length === 0}
+              >
+                <option key="select_type" value="" disabled>
+                  -- input field --
+                </option>
+                {inputFields.map(inpF => {
+                  return (
+                    <option key={inpF} value={inpF}>
+                      {inpF}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
           </div>
         </div>
       </div>
     );
   };
   const expandButtonText = '+ Add a remote relationship';
-  const saveFunc = () => {
+  const saveFunc = toggle => {
     if (!schemaName) {
       return dispatch(showErrorNotification('Please select a remote schema'));
     }
     dispatch(
       saveRemoteRelQuery(
         relName,
-        tableSchema.table_name,
-        selectedField,
+        tableSchema,
+        fieldNamePath,
         inputField,
         tableColumn,
-        reset
+        () => {
+          reset();
+          toggle();
+        }
       )
     );
   };
@@ -259,6 +301,7 @@ const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
         property="remote-add"
         collapseButtonText="Cancel"
         saveFunc={saveFunc}
+        collapseAfterSave
       />
     </div>
   );

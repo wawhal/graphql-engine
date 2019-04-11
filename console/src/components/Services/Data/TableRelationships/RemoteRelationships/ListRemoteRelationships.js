@@ -1,13 +1,15 @@
 import React from 'react';
 import styles from '../../TableModify/ModifyTable.scss';
 import ExpandableEditor from '../../../../Common/Layout/ExpandableEditor/Editor';
-import { getRemoteRelDef } from './remoteRelationshipUtils';
+import {
+  getRemoteRelDef,
+  deleteRemoteRelationship,
+} from './remoteRelationshipUtils';
 
 const ListRemoteRelationships = props => {
-  const { dispatch, remoteRels } = props;
+  const { tableSchema, remoteRels, dispatch } = props;
   return remoteRels.map(rel => {
-    
-    const { table_name, rel_def, rel_name } = rel;
+    const { rel_def, rel_name } = rel;
 
     const collapsedLabel = () => (
       <div>
@@ -48,16 +50,23 @@ const ListRemoteRelationships = props => {
 
     const expandButtonText = 'View';
 
+    const removeFunc = () => {
+      dispatch(deleteRemoteRelationship(tableSchema, rel_name));
+    };
+
     return (
-      <ExpandableEditor
-        editorExpanded={expanded}
-        expandButtonText={expandButtonText}
-        expandedLabel={expandedLabel}
-        service="remote-relationship"
-        property="view"
-        collapsedLabel={collapsedLabel}
-        toggled={false}
-      />
+      <div key={rel_name}>
+        <ExpandableEditor
+          editorExpanded={expanded}
+          expandButtonText={expandButtonText}
+          expandedLabel={expandedLabel}
+          service="remote-relationship"
+          property="view"
+          collapsedLabel={collapsedLabel}
+          toggled={false}
+          removeFunc={removeFunc}
+        />
+      </div>
     );
   });
 };
