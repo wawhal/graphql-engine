@@ -154,8 +154,8 @@ const AddRelationship = ({
       <div className={`${styles.remove_margin_bottom} form-group`}>
         <label>
           {' '}
-          You have no suggested relationships with another table. Add a foreign key to
-          get suggestions{' '}
+          You have no suggested relationships with another table. Add a foreign
+          key to get suggestions{' '}
         </label>
       </div>
     );
@@ -355,6 +355,7 @@ class Relationships extends Component {
       currentSchema,
       migrationMode,
       schemaList,
+      remoteRelationships,
     } = this.props;
     const styles = require('../TableModify/ModifyTable.scss');
     const tableStyles = require('../../../Common/TableCommon/TableStyles.scss');
@@ -528,6 +529,7 @@ class Relationships extends Component {
             <RemoteRelationships
               dispatch={dispatch}
               tableSchema={tableSchema}
+              remoteRels={remoteRelationships}
             />
           </div>
         </div>
@@ -546,6 +548,7 @@ Relationships.propTypes = {
   relAdd: PropTypes.object.isRequired,
   migrationMode: PropTypes.bool.isRequired,
   ongoingRequest: PropTypes.bool.isRequired,
+  remoteRelationships: PropTypes.array,
   lastError: PropTypes.object,
   lastFormError: PropTypes.object,
   lastSuccess: PropTypes.bool,

@@ -1,25 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AddRemoteRelationship from './AddRemoteRelationship';
 import ListRemoteRelationships from './ListRemoteRelationships';
 import styles from '../../TableModify/ModifyTable.scss';
-
-const remoteRels = [
-  // {
-  //   schema: 'schema1',
-  //   rel: 'rel1',
-  // },
-  // {
-  //   schema: 'schema2',
-  //   rel: 'rel2'
-  // },
-  // {
-  //   schema: 'schema2',
-  //   rel: 'rel3'
-  // },
-];
+import { loadRemoteRelationships } from './remoteRelationshipUtils';
 
 const RemoteRelationships = props => {
   // const remoteRels = props.remoteRels;
+  useEffect(() => {
+    props.dispatch(loadRemoteRelationships(props.tableSchema.table_name));
+  }, []);
   const noRemoteRelsMessage = (
     <div className={styles.activeEdit}>
       <div className={`${styles.remove_margin_bottom} form-group`}>
@@ -31,10 +20,9 @@ const RemoteRelationships = props => {
     </div>
   );
 
-  const remoteRelList = (
-    <ListRemoteRelationships {...props} remoteRels={remoteRels} />
-  );
+  const remoteRelList = <ListRemoteRelationships {...props} />;
 
+  const { remoteRels } = props;
   const remoteRelContent =
     remoteRels.length > 0 ? remoteRelList : noRemoteRelsMessage;
 

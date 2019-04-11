@@ -1,40 +1,15 @@
 import React from 'react';
 import ExpandableEditor from '../../../../Common/Layout/ExpandableEditor/Editor';
 import styles from '../../TableModify/ModifyTable.scss';
+import { showErrorNotification } from '../../Notification';
 import {
   useRemoteSchemasEdit,
-  //  useRemoteSchemas,
+  useRemoteSchemas,
+  saveRemoteRelQuery,
 } from './remoteRelationshipUtils';
 
-const schemaInfo = {
-  hasura: [
-    {
-      ty: '__Type',
-      name: '__type',
-    },
-    {
-      ty: 'String!',
-      name: '__typename',
-      desc: 'The name of the current Object type at runtime',
-    },
-    {
-      ty: '__Schema!',
-      name: '__schema',
-    },
-  ],
-  mah_schema: [
-    {
-      ty: 'Hello',
-      name: 'hello',
-      input: [{ name: 'some' }, { name: 'wohoo' }],
-      fields: [],
-      desc: 'Lolz',
-    },
-  ],
-};
-
-const AddRemoteRelationship = ({ tableSchema }) => {
-  // const schemaInfo = useRemoteSchemas(dispatch).schemas || {};
+const AddRemoteRelationship = ({ dispatch, tableSchema }) => {
+  const schemaInfo = useRemoteSchemas(dispatch).schemas || [];
   const {
     relName,
     setRelName,
@@ -48,18 +23,21 @@ const AddRemoteRelationship = ({ tableSchema }) => {
     setTableColumn,
     reset,
   } = useRemoteSchemasEdit();
-  const remoteSchemas = Object.keys(schemaInfo).filter(s => s !== 'hasura');
+  const remoteSchemas = schemaInfo
+    .filter(s => s.schema_name !== 'hasura')
+    .map(s => s.schema_name);
+  let schema = {};
+
   let fields = [];
-  if (schemaName && schemaInfo[schemaName]) {
-    fields = schemaInfo[schemaName]
-      ? schemaInfo[schemaName].map(f => f.name)
-      : [];
+  if (schemaName) {
+    schema = schemaInfo.find(s => s.schema_name === schemaName);
+    fields = schema.fields.map(f => f.name);
   }
   let inputFields = [];
   if (fieldNamePath.length > 0) {
-    const field = schemaInfo[schemaName].find(f => f.name === fieldNamePath[0]);
+    const field = schema.fields.find(f => f.name === fieldNamePath[0]);
     if (field) {
-      inputFields = field.input.map(f => f.name);
+      inputFields = Object.keys(field.input_types);
     }
   }
 
@@ -120,6 +98,8 @@ const AddRemoteRelationship = ({ tableSchema }) => {
               className={`form-control ${styles.wd150px}`}
               value={fieldNamePath[0] || ''}
               onChange={e => setFieldNameInFieldPath(e.target.value)}
+              title={!schemaName ? 'Select remote schema first' : undefined}
+              disabled={!schemaName}
             >
               <option key="empty_key" value="" disabled>
                 -- field name --
@@ -144,6 +124,12 @@ const AddRemoteRelationship = ({ tableSchema }) => {
                 className={`form-control ${styles.wd150px}`}
                 value={inputField || ''}
                 onChange={setInputField}
+                title={
+                  fieldNamePath.length === 0
+                    ? 'Select remote schema and field name first'
+                    : undefined
+                }
+                disabled={fieldNamePath.length === 0}
               >
                 <option key="select_type" value="" disabled>
                   -- input field --
@@ -162,6 +148,12 @@ const AddRemoteRelationship = ({ tableSchema }) => {
                 className={`form-control ${styles.wd150px}`}
                 value={tableColumn || ''}
                 onChange={setTableColumn}
+                title={
+                  fieldNamePath.length === 0
+                    ? 'Select remote schema and field name first'
+                    : undefined
+                }
+                disabled={fieldNamePath.length === 0}
               >
                 <option key="select_type" value="">
                   -- table column --
@@ -181,7 +173,21 @@ const AddRemoteRelationship = ({ tableSchema }) => {
     );
   };
   const expandButtonText = '+ Add a remote relationship';
-  const saveFunc = () => null;
+  const saveFunc = () => {
+    if (!schemaName) {
+      return dispatch(showErrorNotification('Please select a remote schema'));
+    }
+    dispatch(
+      saveRemoteRelQuery(
+        relName,
+        tableSchema.table_name,
+        fieldNamePath[0],
+        inputField,
+        tableColumn,
+        reset
+      )
+    );
+  };
 
   return (
     <div>
