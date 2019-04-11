@@ -122,7 +122,7 @@ const AddRemoteRelationship = ({ tableSchema }) => {
               onChange={e => setFieldNameInFieldPath(e.target.value)}
             >
               <option key="empty_key" value="" disabled>
-                -- field type --
+                -- field name --
               </option>
               {fields.map(t => {
                 return (
@@ -138,12 +138,8 @@ const AddRemoteRelationship = ({ tableSchema }) => {
           <div className={`${styles.add_mar_bottom_mid}`}>
             <b>Mapping</b>
           </div>
-          <div className={`row ${styles.add_mar_bottom_small}`}>
-            <div className="col-md-3">Argument</div>
-            <div className="col-md-6">Table column</div>
-          </div>
           <div className={'row'}>
-            <div className={`col-md-3`}>
+            <div className={'col-md-3'}>
               <select
                 className={`form-control ${styles.wd150px}`}
                 value={inputField || ''}
