@@ -12,8 +12,8 @@ import {
 import jwtDecoder from 'jwt-decode';
 import Icon from 'react-native-vector-icons/Entypo';
 import CenterSpinner from './components/CenterSpinner';
-const auth0ClientId = 'lgKxyHzCDUWCALdAOkjg3QI2D6eglGes';
-const auth0Domain = 'https://todo-hasura-test.auth0.com';
+const auth0ClientId = 'P38qnFo1lFAQJrzkun--wEzqljVNGcWW';
+const auth0Domain = 'https://graphql-tutorials.auth0.com';
 
 
 const toQueryString = (params) => {
@@ -24,8 +24,8 @@ const toQueryString = (params) => {
 
 export default class App extends React.Component {
 
-  state = { 
-    isLoggedIn: false 
+  state = {
+    isLoggedIn: false
   }
 
   loginWithAuth0 = async () => {
@@ -83,7 +83,7 @@ export default class App extends React.Component {
             <TouchableOpacity
               style={styles.loginButton}
               onPress={this.loginWithAuth0}
-            > 
+            >
               <Icon name={"login"} style={styles.buttonIcon} size={20}/>
               <Text style={styles.buttonText}> Login </Text>
             </TouchableOpacity>

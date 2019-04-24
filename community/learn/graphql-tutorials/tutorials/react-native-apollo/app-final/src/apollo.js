@@ -5,7 +5,7 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { split } from "apollo-link";
 import { getMainDefinition } from "apollo-utilities";
 
-const GRAPHQL_ENGINE_ENDPOINT = 'hasura-todo-test.herokuapp.com/v1alpha1/graphql'
+const GRAPHQL_ENGINE_ENDPOINT = 'learn.hasura.io/graphql'
 
 const makeApolloClient = (token) => {
   const httpLink = new HttpLink({
