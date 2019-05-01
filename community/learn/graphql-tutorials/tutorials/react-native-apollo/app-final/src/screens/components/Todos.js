@@ -11,9 +11,11 @@ import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import handleError from '../../utils';
 import TodoItem from './TodoItem';
+import LoadOlder from './LoadOlder';
+import LoadNewer from './LoadNewer';
 import CenterSpinner from './CenterSpinner';
 
-export const fetchTodos = gql`
+export const FETCH_TODOS = gql`
 query (
   $isPublic: Boolean,
 ){
@@ -36,7 +38,7 @@ query (
 }
 `;
 
-const subscribeToNewTodos = gql`
+const SUBSCRIBE_TO_NEW_TODOS = gql`
 subscription {
   todos (
     order_by: {
@@ -50,103 +52,31 @@ subscription {
 }
 `;
 
-const fetchNewTodos = gql`
-query ($lastId: Int){
-  todos (
-    order_by: {
-      id: desc
-    },
-    where: {
-      _and: {
-        is_public: { _eq: true},
-        id: { _gt: $lastId}
-      }
-    }
-  ) {
-    id
-    title
-    is_completed
-    created_at
-    is_public
-    user {
-      name
-    }
-  }
-}
-`;
-
-const fetchOldTodos = gql`
-query ($lastId: Int, $isPublic: Boolean){
-  todos (
-    order_by: {
-      id: desc
-    },
-    where: {
-      _and: {
-        is_public: { _eq: $isPublic},
-        id: { _lt: $lastId}
-      }
-    },
-    limit: 10
-  ) {
-    id
-    title
-    is_completed
-    created_at
-    is_public
-    user {
-      name
-    }
-  }
-}
-`;
 export default class Todos extends React.Component {
 
   constructor (props) {
     super(props);
-    this.props.client.writeData({
-      data: {
-        newTodosExist: false,
-        loadMoreButtonEnabledPublic: true, 
-        loadMoreTextPublic: 'Load more todos',
-        loadMoreButtonEnabledPrivate: true, 
-        loadMoreTextPrivate: 'Load more todos'
-      }
-    });
-  }
-
-  updateCache = (key, value) => {
-    const { client } = this.props;
-    const resp = client.query({query: gql`{
-      newTodosExist @client
-      loadMoreButtonEnabledPublic @client
-      loadMoreTextPublic @client
-      loadMoreButtonEnabledPrivate @client
-      loadMoreTextPrivate @client
-    }`});
-    const newData = {
-      ...resp.data
-    };
-    newData[key] = value;
-    client.writeData({
-      data: {
-        ...newData
-      } 
-    });
+    this.state = {
+      newTodosExist: false
+    }
   }
 
   async componentDidMount() {
+    this.SUBSCRIBE_TO_NEW_TODOS();
+  }
+
+  SUBSCRIBE_TO_NEW_TODOS = () => {
     const { client, isPublic } = this.props;
     if (isPublic) {
       client.subscribe({
-        query: subscribeToNewTodos,
+        query: SUBSCRIBE_TO_NEW_TODOS,
       }).subscribe({
         next: (event) => {
           if (event.data.todos.length) {
             let localData;
             try {
               localData = client.readQuery({
-                query: fetchTodos,
+                query: FETCH_TODOS,
                 variables: {
                   isPublic: true,
                 }
@@ -155,9 +85,9 @@ export default class Todos extends React.Component {
               return;
             } 
             
-            const lastId = localData.todos[0] ? localData.todos[0].id : 0
+            const lastId = localData.todos[0] ? localData.todos[0].id : 0;
             if (event.data.todos[0].id > lastId) {
-              this.updateCache(`newTodosExist`, true)
+              this.setState({ newTodosExist: true})
             }
           }
         },
@@ -168,32 +98,8 @@ export default class Todos extends React.Component {
     }
   }
 
-  fetchNewTodos = async () => {
-    const { client, isPublic } = this.props;
-    const data = client.readQuery({
-      query: fetchTodos,
-      variables: {
-        isPublic,
-      }
-    });
-    const lastId = data.todos[0].id;
-    const resp = await client.query({
-      query: fetchNewTodos,
-      variables: { lastId }
-    });
-    if (resp.data) {
-      const newData = {
-        todos: [ ...resp.data.todos, ...data.todos]
-      }
-      client.writeQuery({
-        query: fetchTodos,
-        variables: {
-          isPublic,
-        },
-        data: newData
-      });
-      this.updateCache('newTodosExist', false)
-    }
+  dismissNewTodoBanner = () => {
+    this.setState({ newTodosExist: false });
   }
 
   render() {
@@ -201,7 +107,7 @@ export default class Todos extends React.Component {
     const todoType = isPublic ? 'Public' : 'Private';
     return (
       <Query
-        query={fetchTodos}
+        query={FETCH_TODOS}
         variables={{isPublic: this.props.isPublic}}
       >
         {
@@ -215,14 +121,17 @@ export default class Todos extends React.Component {
             }
             return (
               <View style={styles.container}>
-                {isPublic && <NewTodosBanner fetch={this.fetchNewTodos} />}
+                <LoadNewer show={this.state.newTodosExist && isPublic} toggleShow={this.dismissNewTodoBanner} styles={styles} isPublic={this.props.isPublic}/>
                 <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContainer}>
                   <FlatList
                     data={data.todos}
                     renderItem={({item}) => <TodoItem item={item} isPublic={this.props.isPublic}/>}
                     keyExtractor={(item) => item.id.toString()}
                   />
-                  <LoadMoreButton updateCache={this.updateCache} fetchOlderTodos={this.fetchOlderTodos} todoType={todoType}/>
+                  <LoadOlder
+                    isPublic={this.props.isPublic}
+                    styles={styles}
+                  />
                 </ScrollView>
               </View>
             );
@@ -231,99 +140,7 @@ export default class Todos extends React.Component {
       </Query>
     );
   }
-
-  fetchOlderTodos = async () => {
-    const { client, isPublic } = this.props;
-    const todoType = isPublic ? 'Public' : 'Private';
-    const data = client.readQuery({
-      query: fetchTodos,
-      variables: {
-        isPublic,
-      }
-    });
-    const response = await client.query({
-      query: fetchOldTodos,
-      variables: {
-        isPublic,
-        lastId: data.todos[data.todos.length - 1].id
-      },
-    });
-    if (!response.data) {
-      return;
-    }
-    if (response.data.todos) {
-      client.writeQuery({
-        query: fetchTodos,
-        variables: {
-          isPublic
-        },
-        data: { todos: [ ...data.todos, ...response.data.todos]}
-      });
-      if (response.data.todos.length < 10) {
-        this.updateCache(`loadMoreText${todoType}`, 'No more todos');  
-      } else {
-        this.updateCache(`loadMoreButtonEnabled${todoType}`, true);
-      }
-    } else {
-      this.updateCache(`loadMoreText${todoType}`, 'No more todos');  
-    }
-  }
 }
-
-const LoadMoreButton = ({updateCache, fetchOlderTodos, todoType}) => (
-  <Query
-    query={gql`{
-      loadMoreButtonEnabledPublic @client
-      loadMoreTextPublic @client
-      loadMoreButtonEnabledPrivate @client
-      loadMoreTextPrivate @client
-    }`}
-  >
-    {
-      ({data}) => {
-        return (
-          <TouchableOpacity
-            style={styles.pagination}
-            onPress={() => {
-              updateCache(`loadMoreButtonEnabled${todoType}`, false);
-              fetchOlderTodos();
-            }}
-            disabled={!data[`loadMoreButtonEnabled${todoType}`]}
-          > 
-            {
-              !data[`loadMoreButtonEnabled${todoType}`] && data[`loadMoreText${todoType}`] !== 'No more todos' ?
-              <CenterSpinner /> :
-              <Text style={styles.buttonText}> {data[`loadMoreText${todoType}`]} </Text>
-            }
-          </TouchableOpacity> 
-        )
-      }
-    }
-  </Query>
-);
-
-
-const NewTodosBanner = (props) => (
-  <Query
-    query={gql`{ newTodosExist @client }`}
-  >
-    {
-      ({data}) => {
-        if (data && data.newTodosExist) {
-          return (
-            <TouchableOpacity
-              onPress={props.fetch}
-              style={styles.banner}
-            >
-              <Text style={styles.buttonText}> Load new todos </Text>
-            </TouchableOpacity>
-          )
-        }
-        return null;
-      }
-    }
-  </Query>
-)
 
 const styles = StyleSheet.create({
   container: {

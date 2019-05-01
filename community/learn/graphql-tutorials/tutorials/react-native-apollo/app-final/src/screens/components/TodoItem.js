@@ -9,10 +9,10 @@ import {
 import {Mutation} from 'react-apollo';
 import gql from 'graphql-tag';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { fetchTodos } from './Todos';
+import { FETCH_TODOS } from './Todos';
 import CenterSpinner from './CenterSpinner';
 
-const updateTodo = gql`
+const UPDATE_TODO = gql`
   mutation ($id: Int, $isCompleted: Boolean) {
     update_todos (
       _set: {
@@ -36,7 +36,7 @@ const updateTodo = gql`
   }
 `;
 
-const deleteTodo= gql`
+const DELETE_TODO = gql`
   mutation ($id: Int) {
     delete_todos (
       where: {
@@ -54,11 +54,25 @@ export default class TodoItem extends React.Component {
 
   render() {
     const { item, isPublic } = this.props;
-    return (
-      <View style={styles.todoContainer}>
-        { isPublic && <UserItem username={item.user.name}/>}
+    const userIcon = () => {
+      if (!isPublic) {
+        return null;
+      }
+      return (
+        <TouchableOpacity
+          style={styles.userItem}
+          onPress={() => Alert.alert('Message', `This todo is by @${item.user.name}`)}
+        >
+          <Text style={styles.userText}>@{item.user.name.toLowerCase()}</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    const updateCheckbox = () => {
+      if (isPublic) return null;
+      return (
         <Mutation
-          mutation={updateTodo}
+          mutation={UPDATE_TODO}
           variables={{
             id: item.id,
             isCompleted: !item.is_completed
@@ -85,19 +99,28 @@ export default class TodoItem extends React.Component {
             }
           }
         </Mutation>
-        <View style={styles.todoTextWrapper}>
-          <Text style={item.is_completed ? styles.completedText : styles.activeText}>
-            {item.title}
-          </Text>
-        </View>
+      )
+    }
+
+    const todoText = () => (
+      <View style={styles.todoTextWrapper}>
+        <Text style={item.is_completed ? styles.completedText : styles.activeText}>
+          {item.title}
+        </Text>
+      </View>
+    )
+
+    const deleteButton = () => {
+      if (isPublic) return null;
+      return (
         <Mutation
-          mutation={deleteTodo}
+          mutation={DELETE_TODO}
           variables={{
             id: item.id,
           }}
           update={(cache) => {
             const data = cache.readQuery({
-              query: fetchTodos,
+              query: FETCH_TODOS,
               variables: {
                 isPublic,
               }
@@ -106,7 +129,7 @@ export default class TodoItem extends React.Component {
               todos: data.todos.filter((t) => t.id !== item.id)
             }
             cache.writeQuery({
-              query: fetchTodos,
+              query: FETCH_TODOS,
               variables: {
                 isPublic,
               },
@@ -137,27 +160,45 @@ export default class TodoItem extends React.Component {
             }
           }
         </Mutation> 
+      )
+    }
+
+    const todoContainerStyle = isPublic ? styles.todoContainerPublic : styles.todoContainerPrivate;
+
+    return (
+      <View style={todoContainerStyle}>
+        {userIcon()}
+        {updateCheckbox()}
+        {todoText()}
+        {deleteButton()}
       </View>
     );
   }
 }
 
-const UserItem = ({username}) => (
-  <TouchableOpacity
-    style={styles.userItem}
-    onPress={() => Alert.alert('Message', `This todo is by ${username}`)}
-  >
-    <Text style={styles.userText}>{username[0].toUpperCase()}</Text>
-  </TouchableOpacity>
-);
+const UserIcon = ({username, isPublic}) => {
+}
 
 const styles = StyleSheet.create({
-  todoContainer: {
+  todoContainerPrivate: {
     margin: 5,
     padding: 5,
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    minHeight: 40,
+    borderRadius: 4,
+    borderWidth: 0.5,
+    borderColor: '#d6d7da',
+    backgroundColor: 'white'
+  },
+  todoContainerPublic: {
+    margin: 5,
+    padding: 5,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     minHeight: 40,
     borderRadius: 4,
@@ -197,7 +238,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'green'
   },
   userItem: {
-    flex: 0.1,
     height: 30,
     backgroundColor: 'white',
     justifyContent: 'center',

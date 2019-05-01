@@ -13,16 +13,12 @@ mutation ($userId: String) {
     _set: {
       last_seen: "now()"
     },
-    where: {
-      auth0_id: {
-        _eq: $userId
-      }
-    }
+    where: {}
   ) {
     affected_rows
   }
 }
-`
+`;
 export default class App extends React.Component {
 
   static router = Drawer.router;

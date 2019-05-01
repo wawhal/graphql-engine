@@ -8,14 +8,13 @@ import {
 } from 'react-native';
 import gql from 'graphql-tag';
 import {Mutation} from 'react-apollo';
-import { fetchTodos } from './Todos';
+import { FETCH_TODOS } from './Todos';
 
 const insertTodo = gql`
-  mutation ($text: String!, $userId: String!, $isPublic: Boolean){
+  mutation ($text: String!, $isPublic: Boolean){
     insert_todos (
       objects: [{
         title: $text,
-        user_id: $userId,
         is_public: $isPublic
       }]
     ){
@@ -47,13 +46,12 @@ export default class Textbox extends React.Component {
         mutation={insertTodo}
         variables={{
           text,
-          userId,
           isPublic
         }}
         update={(cache, {data: {insert_todos}}) => {
           if (isPublic) { return; }
           const data = cache.readQuery({
-            query: fetchTodos,
+            query: FETCH_TODOS,
             variables: {
               isPublic,
             }
@@ -63,7 +61,7 @@ export default class Textbox extends React.Component {
             todos: [ newTodo, ...data.todos]
           }
           cache.writeQuery({
-            query: fetchTodos,
+            query: FETCH_TODOS,
             variables: {
               isPublic,
             },
@@ -75,6 +73,7 @@ export default class Textbox extends React.Component {
           (insertTodo, { loading, error}) => {
             const submit = () => {
               if (error) {
+                console.log(error);
                 return <Text> Error </Text>;
               }
               if (loading || text === '') {
