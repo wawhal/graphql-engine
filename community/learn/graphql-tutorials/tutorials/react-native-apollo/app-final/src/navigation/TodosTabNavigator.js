@@ -1,5 +1,5 @@
 import React from 'react';
-import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
+import { createStackNavigator, createBottomTabNavigator, createAppContainer } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
 import PrivateTodos from '../screens/PrivateTodosScreen';
@@ -39,4 +39,4 @@ const TodosTabNavigator = createBottomTabNavigator({
 });
 
 
-export default TodosTabNavigator;
+export default createAppContainer(TodosTabNavigator);

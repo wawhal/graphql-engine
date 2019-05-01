@@ -18,15 +18,16 @@ query (
   $isPublic: Boolean,
 ){
   todos (
-    order_by: id_desc,
+    order_by: {
+      id: desc
+    },
     where: { is_public: { _eq: $isPublic} }
     limit: 10
   ) {
     id
-    text
+    title
     is_completed
     created_at
-    updated_at
     is_public
     user {
       name
@@ -38,7 +39,9 @@ query (
 const subscribeToNewTodos = gql`
 subscription {
   todos (
-    order_by: id_desc
+    order_by: {
+      id: desc
+    }
     limit: 1
     where: { is_public: { _eq: true }}
   ) {
@@ -50,7 +53,9 @@ subscription {
 const fetchNewTodos = gql`
 query ($lastId: Int){
   todos (
-    order_by: id_desc,
+    order_by: {
+      id: desc
+    },
     where: {
       _and: {
         is_public: { _eq: true},
@@ -59,10 +64,9 @@ query ($lastId: Int){
     }
   ) {
     id
-    text
+    title
     is_completed
     created_at
-    updated_at
     is_public
     user {
       name
@@ -74,7 +78,9 @@ query ($lastId: Int){
 const fetchOldTodos = gql`
 query ($lastId: Int, $isPublic: Boolean){
   todos (
-    order_by: id_desc,
+    order_by: {
+      id: desc
+    },
     where: {
       _and: {
         is_public: { _eq: $isPublic},
@@ -84,10 +90,9 @@ query ($lastId: Int, $isPublic: Boolean){
     limit: 10
   ) {
     id
-    text
+    title
     is_completed
     created_at
-    updated_at
     is_public
     user {
       name
@@ -254,7 +259,7 @@ export default class Todos extends React.Component {
         },
         data: { todos: [ ...data.todos, ...response.data.todos]}
       });
-      if (response.data.todos < 10) {
+      if (response.data.todos.length < 10) {
         this.updateCache(`loadMoreText${todoType}`, 'No more todos');  
       } else {
         this.updateCache(`loadMoreButtonEnabled${todoType}`, true);

@@ -30,7 +30,6 @@ const updateTodo = gql`
         text
         is_completed
         created_at
-        updated_at
         is_public
       }
     }
@@ -88,7 +87,7 @@ export default class TodoItem extends React.Component {
         </Mutation>
         <View style={styles.todoTextWrapper}>
           <Text style={item.is_completed ? styles.completedText : styles.activeText}>
-            {item.text}
+            {item.title}
           </Text>
         </View>
         <Mutation

@@ -2,7 +2,7 @@ import React from 'react';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import AuthLoadingScreen from '../screens/AuthLoadingScreen';
 import AuthScreen from '../screens/AuthScreen';
-import App from './DrawerNavigator';
+import App from './Main';
 
 const Navigator = createSwitchNavigator(
   {
@@ -11,7 +11,7 @@ const Navigator = createSwitchNavigator(
     // For fetching and validating session
     Loading: AuthLoadingScreen,
     // Main app
-    Main: ({navigation}) => <App screenProps={{rootNavigation: navigation}} />
+    Main: App
   },
   {
     initialRouteName: 'Loading'

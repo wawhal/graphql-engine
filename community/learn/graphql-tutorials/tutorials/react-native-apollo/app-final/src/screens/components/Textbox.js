@@ -14,17 +14,16 @@ const insertTodo = gql`
   mutation ($text: String!, $userId: String!, $isPublic: Boolean){
     insert_todos (
       objects: [{
-        text: $text,
+        title: $text,
         user_id: $userId,
         is_public: $isPublic
       }]
     ){
       returning {
         id
-        text
+        title
         is_completed
         created_at
-        updated_at
         is_public
         user {
           name

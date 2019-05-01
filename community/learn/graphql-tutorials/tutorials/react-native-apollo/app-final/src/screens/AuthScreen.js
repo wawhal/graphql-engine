@@ -35,13 +35,16 @@ export default class App extends React.Component {
     const result = await AuthSession.startAsync({
       authUrl: `${auth0Domain}/authorize` + toQueryString({
         client_id: auth0ClientId,
-        response_type: 'token',
+        response_type: 'token id_token',
+        audience: `${auth0Domain}/userinfo`,
         scope: 'openid profile',
         redirect_uri: redirectUrl,
+        nonce: 'nonce'
       }),
     });
     // if success, handle the result
     if (result.type === 'success') {
+      console.log(result);
       this.handleParams(result.params);
     }
   }

@@ -13,11 +13,15 @@ import CenterSpinner from './components/CenterSpinner';
 
 // GraphQL subscription to subscribe to online users
 const subscribeToOnlineUsers = gql`
-subscription {
-  online_users (order_by: name_asc){
-    name
+  subscription {
+    online_users(order_by: {user: {name: asc}}) {
+      user {
+        name
+        id
+      }
+      id
+    }
   }
-}
 `; 
 
 export default class OnlineUsers extends React.Component {
@@ -33,12 +37,13 @@ export default class OnlineUsers extends React.Component {
               if (error) {
                 return <Text> Error </Text>
               }
+              console.log(data.online_users);
               return (
                 <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContainer}>
                 <FlatList
                   data={data.online_users}
                   renderItem={({item}) => <UserItem item={item} />}
-                  keyExtractor={(item) => item.name}
+                  keyExtractor={(item) => item.user.name}
                 />
                 </ScrollView>
               )
@@ -52,7 +57,7 @@ export default class OnlineUsers extends React.Component {
 
 const UserItem = ({item}) => (
   <View style={styles.userContainer}>
-    <Text> {item.name} </Text>
+    <Text> {item.user.name} </Text>
     <View style={styles.greenDot} />
   </View>
 )

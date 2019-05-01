@@ -25,16 +25,22 @@ export default class AuthLoadingScreen extends React.Component {
       const sessionObj = JSON.parse(session);
       var currentTime = Math.floor(new Date().getTime() / 1000);
       if (currentTime < sessionObj.exp) {
+        console.log('Navigating to main');
+        console.log(this.props.navigation);
         this.props.navigation.navigate('Main');
       } else {
+        console.log('Navigating to auth');
         this.props.navigation.navigate('Auth');
       }
     } else {
+      console.log('Navigating to auth');
       this.props.navigation.navigate('Auth');
     }
   };
 
   render() {
+    console.log(this.props);
+    console.log('props');
     return (
       <View>
         <CenterSpinner />
