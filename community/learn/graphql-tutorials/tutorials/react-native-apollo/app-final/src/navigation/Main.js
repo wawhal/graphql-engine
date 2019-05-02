@@ -21,8 +21,6 @@ mutation ($userId: String) {
 `;
 export default class App extends React.Component {
 
-  static router = Drawer.router;
-
   state = {
     client: null,
   }

@@ -2,11 +2,10 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { TouchableOpacity } from 'react-native';
 
-const MenuButton = ({ onClick }) => {
-  console.log('onclick of menu button');
-  console.log(onClick);
+const MenuButton = ({ onPress }) => {
+
   return (
-    <TouchableOpacity  style={{marginLeft: 20}} onClick={onClick}>
+    <TouchableOpacity style={{marginLeft: 20}} onPress={onPress}>
       <Icon
         name="menu"
         size={26}

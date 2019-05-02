@@ -10,6 +10,7 @@ import {
 import { Subscription } from 'react-apollo';
 import gql from 'graphql-tag';
 import CenterSpinner from './components/CenterSpinner';
+import MenuButton from '../components/MenuButton';
 
 // GraphQL subscription to subscribe to online users
 const subscribeToOnlineUsers = gql`
@@ -25,6 +26,14 @@ const subscribeToOnlineUsers = gql`
 `; 
 
 export default class OnlineUsers extends React.Component {
+
+  static navigationOptions = ({ navigation }) => ({
+    headerTitle: 'Online Users',
+    headerLeft: (
+      <MenuButton onPress={navigation.toggleDrawer} /> 
+    )
+  }); 
+
   render() {
     return (
       <View style={styles.container}>
@@ -37,7 +46,6 @@ export default class OnlineUsers extends React.Component {
               if (error) {
                 return <Text> Error </Text>
               }
-              console.log(data.online_users);
               return (
                 <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContainer}>
                 <FlatList

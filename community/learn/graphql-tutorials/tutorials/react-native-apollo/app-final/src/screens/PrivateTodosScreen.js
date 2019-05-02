@@ -3,17 +3,13 @@ import TodoScreen from './TodoScreen';
 import MenuButton from '../components/MenuButton';
 
 export default class PrivateTodos extends React.Component {
-  static navigationOptions = {
+
+  static navigationOptions = ({ navigation }) => ({
     headerTitle: 'Private Todos',
     headerLeft: (
-      <MenuButton onClick={this.openDrawer}/> 
+      <MenuButton onPress={navigation.toggleDrawer} /> 
     )
-  };
-
-  openDrawer = () => {
-    console.log('opening drawer');
-    this.props.navigation.toggleDrawer();
-  }
+  });
 
   render() {
     // return TodoScreen with prop isPublic as false

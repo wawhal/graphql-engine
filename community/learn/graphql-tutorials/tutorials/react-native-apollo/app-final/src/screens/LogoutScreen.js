@@ -14,12 +14,15 @@ export default class LogoutScreen extends React.Component {
 
   logout = (client) => {
     AsyncStorage.removeItem('@todo-graphql:auth0').then(() => {
+      console.log('trying to log out');
       client.resetStore();
-      this.props.screenProps.rootNavigation.navigate('Loading');
-    })
+      this.props.navigation.navigate('Auth');
+      console.log('reached here');
+    });
   } 
 
   render() {
+    console.log(this.props);
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <CenterSpinner />
