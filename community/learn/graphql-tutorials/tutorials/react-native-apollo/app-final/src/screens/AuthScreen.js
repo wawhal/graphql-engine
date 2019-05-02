@@ -44,7 +44,6 @@ export default class App extends React.Component {
     });
     // if success, handle the result
     if (result.type === 'success') {
-      console.log(result);
       this.handleParams(result.params);
     }
   }
@@ -56,6 +55,7 @@ export default class App extends React.Component {
         || 'something went wrong while logging in');
       return;
     }
+
     // store session in storage and redirect back to the app
     const encodedToken = responseObj.id_token;
     const decodedToken = jwtDecoder(encodedToken);
