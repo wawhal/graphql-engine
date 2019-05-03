@@ -176,9 +176,6 @@ export default class TodoItem extends React.Component {
   }
 }
 
-const UserIcon = ({username, isPublic}) => {
-}
-
 const styles = StyleSheet.create({
   todoContainerPrivate: {
     margin: 5,

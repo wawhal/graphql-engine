@@ -1,4 +1,3 @@
-import React from 'react';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import AuthLoadingScreen from '../screens/AuthLoadingScreen';
 import AuthScreen from '../screens/AuthScreen';

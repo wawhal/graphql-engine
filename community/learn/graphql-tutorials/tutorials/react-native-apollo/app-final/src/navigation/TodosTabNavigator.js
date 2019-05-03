@@ -1,6 +1,5 @@
 import React from 'react';
 import { createStackNavigator, createBottomTabNavigator, createAppContainer } from 'react-navigation';
-
 import TabBarIcon from '../components/TabBarIcon';
 import PrivateTodos from '../screens/PrivateTodosScreen';
 import PublicTodos from '../screens/PublicTodosScreen';
@@ -37,6 +36,5 @@ const TodosTabNavigator = createBottomTabNavigator({
   PrivateTodosStack,
   PublicTodosStack,
 });
-
 
 export default createAppContainer(TodosTabNavigator);

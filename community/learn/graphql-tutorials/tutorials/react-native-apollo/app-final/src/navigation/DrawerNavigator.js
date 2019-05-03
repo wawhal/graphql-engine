@@ -1,13 +1,7 @@
-import React from 'react';
-import {
-  AsyncStorage
-} from 'react-native';
 import { createStackNavigator, createDrawerNavigator, createAppContainer } from 'react-navigation';
 import OnlineUsers from '../screens/UsersScreen';
 import LogoutScreen from '../screens/LogoutScreen';
 import TodosTabs from './TodosTabNavigator';
-import makeApolloClient from '../apollo';
-import CenterSpinner from '../screens/components/CenterSpinner';
 
 const LogoutStack = createStackNavigator({
   Logout: LogoutScreen

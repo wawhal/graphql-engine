@@ -40,7 +40,7 @@ export default class Textbox extends React.Component {
 
   render() {
     const { text } = this.state;
-    const { userId, isPublic } = this.props;
+    const { isPublic } = this.props;
     return (
       <Mutation
         mutation={insertTodo}

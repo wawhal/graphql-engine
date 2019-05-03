@@ -3,7 +3,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   FlatList,
 } from 'react-native';
@@ -104,7 +103,6 @@ export default class Todos extends React.Component {
 
   render() {
     const { isPublic } = this.props;
-    const todoType = isPublic ? 'Public' : 'Private';
     return (
       <Query
         query={FETCH_TODOS}

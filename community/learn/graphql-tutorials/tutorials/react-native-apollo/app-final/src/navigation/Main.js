@@ -30,7 +30,7 @@ export default class App extends React.Component {
     // fetch session
     const session = await AsyncStorage.getItem('@todo-graphql:auth0');
     const sessionObj = JSON.parse(session);
-    const { token, id, name } = sessionObj;
+    const { token, id } = sessionObj;
     // make apollo client with this session token
     const client = makeApolloClient(token);
     // start emitting events saying that the useri s online
