@@ -8,36 +8,18 @@ import { getMainDefinition } from "apollo-utilities";
 const GRAPHQL_ENGINE_ENDPOINT = 'learn.hasura.io/graphql'
 
 const makeApolloClient = (token) => {
-  const httpLink = new HttpLink({
-    uri: `https://${GRAPHQL_ENGINE_ENDPOINT}`,
+  const link = new HttpLink({
+    uri: `https://learn.hasura.io/graphql`,
     headers: {
       Authorization: `Bearer ${token}`
     }
   });
-  const wsLink = new WebSocketLink({
-    uri: `wss://${GRAPHQL_ENGINE_ENDPOINT}`,
-    options: {
-      reconnect: true,
-      connectionParams: {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    }
-  });
 
-  const link = split(
-    // split based on operation type
-    ({ query }) => {
-      const { kind, operation } = getMainDefinition(query);
-      return kind === 'OperationDefinition' && operation === 'subscription';
-    },
-    wsLink,
-    httpLink,
-  );
+  const cache = new InMemoryCache()
+
   const client = new ApolloClient({
     link,
-    cache: new InMemoryCache(),
+    cache
   });
 
   return client;
