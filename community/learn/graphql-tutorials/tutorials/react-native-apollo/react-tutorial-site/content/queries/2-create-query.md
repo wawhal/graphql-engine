@@ -58,7 +58,10 @@ The query fetches `todos` with a simple condition; `is_public` must be false. We
 
 [Try](https://learn.hasura.io/graphql/graphiql) out this query now!
 
-As you see, we have explicitly mentioned that `is_public` must be false. But in order to reuse this query for private and public todos, we must parameterise this query using query variables. Lets define a boolean query variable called `is_public`. The GraphQL query would fetch public todos if `is_public` is true and personal todos if `is_public` is false. Change it in the code as follows:
+Introducing query variables
+---------------------------
+
+As you see, we have explicitly mentioned that `is_public` must be false. But in order to reuse this query for private and public todos, we must parameterise this query using `query variables`. Lets define a boolean query variable called `is_public`. The GraphQL query would fetch public todos if `is_public` is true and personal todos if `is_public` is false. Change it in the code as follows:
 
 ```graphql
 - query {
@@ -82,7 +85,7 @@ As you see, we have explicitly mentioned that `is_public` must be false. But in 
 + }
 ```
 
-Great! The query is now ready, let's integrate it with our react native code. Currently, we are just rendering some dummy data. Let us remove this dummy data and render the UI based on our GraphQL response. Firstly, lets import `Query` component from `react-apollo`;
+Great! The query is now ready, let's integrate it with our react native code. Currently, we are just rendering some dummy data. Let us remove this dummy data and render the UI based on our GraphQL response. Firstly, lets import `Query` component from `react-apollo`.
 
 ```js
 
@@ -127,13 +130,7 @@ render () {
 +    >
 +      {
 +        ({data, error, loading }) => {
-+          if (error) {
-+            console.error(error);
-+            return <Text>Error</Text>;
-+          }
-+          if (loading) {
-+            return <CenterSpinner />;
-+          }
++          if (!data.todos) return null;
 +          return (
             <View style={styles.container}>
             <LoadNewer show={this.state.newTodosExist && isPublic} toggleShow={this.dismissNewTodoBanner} styles={styles} isPublic={this.props.isPublic}/>
@@ -161,7 +158,7 @@ Remember that we wrapped our App component with `<ApolloProvider>` and passed `c
 
 We are importing the `Query` component from `react-apollo` and the graphql query we defined above to fetch the todo data.
 
-Then, we wrap the new functional component with `Query` passing our graphql query.
+Then, we wrap the new functional component with `Query` passing our graphql query. We also provide a prop to this Query component called `variables`. This is where we pass the value of the query variables.
 
 Woot! You have written your first GraphQL integration with React. Easy isn't it?
 

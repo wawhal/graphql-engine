@@ -7,9 +7,25 @@ In this part of the tutorial, you will learn how to mark an existing todo as com
 Let's define a graphql query to do a mutation into todos.
 
 ```graphql
-  mutation toggleTodo ($id: Int!, $isCompleted: Boolean!) {
-    update_todos(where: {id: {_eq: $id}}, _set: {is_completed: $isCompleted}) {
-      affected_rows
+  mutation ($id: Int, $isCompleted: Boolean) {
+    update_todos (
+      _set: {
+        is_completed: $isCompleted,
+        updated_at: "now()"
+      },
+      where: {
+        id: {
+          _eq: $id
+        }
+      }
+    ) {
+      returning {
+        id
+        text
+        is_completed
+        created_at
+        is_public
+      }
     }
   }
 ```
@@ -17,4 +33,4 @@ You will also need to pass in the values for the variables.
 
 [Try](https://learn.hasura.io/graphql/graphiql) this mutation in GraphiQL against the application database to see what the response looks like.
 
-Let's now integrate this graphql mutation into our react app.
+Let's now integrate this graphql mutation into our react native app.

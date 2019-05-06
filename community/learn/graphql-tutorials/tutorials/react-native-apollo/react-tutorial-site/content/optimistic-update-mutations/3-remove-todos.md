@@ -7,8 +7,14 @@ In this part of the tutorial, you will learn how to remove existing todos by usi
 Let's define a graphql query to do a mutation into todos.
 
 ```graphql
-mutation removeTodo ($id: Int!) {
-  delete_todos(where: {id: {_eq: $id}}) {
+mutation ($id: Int) {
+  delete_todos (
+    where: {
+      id: {
+        _eq: $id
+      }
+    }
+  ) {
     affected_rows
   }
 }

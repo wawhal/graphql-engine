@@ -1,5 +1,5 @@
 ---
-title: "Mutations & Query variables"
+title: "Mutations"
 ---
 
 Now, let's add the ability for our users to create new todos and add them to

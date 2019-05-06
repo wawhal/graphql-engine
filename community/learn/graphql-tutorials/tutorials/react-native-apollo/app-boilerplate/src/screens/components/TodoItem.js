@@ -56,7 +56,6 @@ export default class TodoItem extends React.Component {
       if (isPublic) return null;
       const remove = () => {
         if (loading) { return; }
-        deleteTodo();
       };
       return (
         <View style={styles.deleteButton}>

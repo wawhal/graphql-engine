@@ -1,106 +1,86 @@
 ---
-title: "Mutation and update cache"
+title: "Update mutation and automatic cache updates"
 ---
 
-Now let's do the integration part. Open `src/components/Todo/TodoItem.js` and add the following code below the other imports:
+Now let's do the integration part. Open `src/screens/components/TodoItem.js` and add the following code below the other imports:
 
 ```javascript
-import gql from 'graphql-tag';
++import gql from 'graphql-tag';
 ```
 Let's define the graphql mutation to update the completed status of the todo
 
 ```javascript
-const TodoItem = ({index, todo}) => {
-
-  const removeTodo = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-+  const TOGGLE_TODO = gql`
-+    mutation toggleTodo ($id: Int!, $isCompleted: Boolean!) {
-+      update_todos(where: {id: {_eq: $id}}, _set: {is_completed: $isCompleted}) {
-+        affected_rows
++const UPDATE_TODO = gql`
++  mutation ($id: Int, $isCompleted: Boolean) {
++    update_todos (
++      _set: {
++        is_completed: $isCompleted,
++        updated_at: "now()"
++      },
++      where: {
++        id: {
++          _eq: $id
++        }
++      }
++    ) {
++      returning {
++        id
++        text
++        is_completed
++        created_at
++        is_public
 +      }
 +    }
-+  `;
++  }
++`;
+```
 
-  const toggleTodo = () => {};
+Now, in the render function of the `TodoItem` component, modify the `updateCheckbox` function to wrap the JSX with a `Mutation` component so that we can toggle todos.
 
+
+```js
+const updateCheckbox = () => {
+  if (isPublic) return null;
+-  const update = () => {
+-  }
   return (
-    ...
-  );
-};
-
-export default TodoItem;
-
-```
-
-We need to call `client.mutate` to make the mutation. To make sure we have access to `client`, we wrap our TodoItem component with `withApollo` like below:
-
-```javascript
-  import React from 'react';
-+ import {withApollo} from 'react-apollo';
-  import gql from 'graphql-tag';
-
-  const TodoItem = ({index, todo}) => {
-  };
-
-- export default TodoItem;
-+ export default withApollo(TodoItem);
-```
-
-`withApollo` will inject the `client` prop to the TodoItem component. Let's add it to the props list
-
-```javascript
--  const TodoItem = ({index, todo}) => {
-+  const TodoItem = ({index, todo, client}) => {
-```
-
-We already have the onChange handler toggleTodo for the input. Let's update the function to make a mutation.
-
-```javascript
-  const toggleTodo = () => {
-+    client.mutate({
-+      mutation: TOGGLE_TODO,
-+      variables: {id: todo.id, isCompleted: !todo.is_completed},
-+      optimisticResponse: {},
-+    });
-  };
-```
-
-The above code will just make a mutation, updating the todo's is_completed property in the database.
-To update the cache,we will be using the `update` function again to modify the cache. We need to fetch the current list of todos from the cache before modifying it. So let's import the query.
-
-```javascript
-import {GET_MY_TODOS} from './TodoPrivateList';
-```
-
-```javascript
-  const toggleTodo = () => {
-    client.mutate({
-      mutation: TOGGLE_TODO,
-      variables: {id: todo.id, isCompleted: !todo.is_completed},
-      optimisticResponse: {},
-+      update: (cache) => {
-+        const existingTodos = cache.readQuery({ query: GET_MY_TODOS });
-+        const newTodos = existingTodos.todos.map(t => {
-+          if (t.id === todo.id) {
-+            return({...t, is_completed: !t.is_completed});
-+          } else {
-+            return t;
++    <Mutation
++      mutation={UPDATE_TODO}
++      variables={{
++        id: item.id,
++        isCompleted: !item.is_completed
++      }}
++    >
++      {
++        (updateTodo, {loading, error}) => {
++          const update = () => {
++            // do not fire another mutation if there's already a mutation in progress
++            if (loading) { return; }
++            updateTodo();
 +          }
-+        });
-+        cache.writeQuery({
-+          query: GET_MY_TODOS,
-+          data: {todos: newTodos}
-+        });
++          return (
+            <TouchableOpacity
+              style={item.is_completed ? styles.completedCheckBox : styles.checkBox}
+              onPress={update}
+              disabled={loading}
+            >
+              { loading && <CenterSpinner />}
+            </TouchableOpacity>
++          )
++        }
 +      }
-+    });
-  };
-
++    </Mutation>
+  )
+}
 ```
 
-We are fetching the existing todos from the cache using `cache.readQuery` and updating the is_completed value for the todo that has been updated.
+The above code will just make a mutation, updating the todo's is_completed property in the database. If you see in the above code snippet, we are not doing anything to updating the cache, but if you try it out, the mutation succeeds and the UI is also updated.
 
-Finally we are writing the updated todo list to the cache using `cache.writeQuery`.
+This happens because, in case of update mutation, apollo client tries to keep the cache fresh by performing automatic updates using the following strategy:
+
+1. It looks at the `id` and `__typename` of the mutation response
+2. It looks for the objects in the cache that have `id` and `__typename` similar to the ones in the mutation response.
+3. If there is a match, it updates the cache with the data from the mutation response
+
+Hence we don't have to manually update the cache just like we did in case of insert mutation.
+

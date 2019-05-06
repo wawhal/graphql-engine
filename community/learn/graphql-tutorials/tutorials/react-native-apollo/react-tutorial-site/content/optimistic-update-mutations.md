@@ -1,5 +1,5 @@
 ---
-title: "Optimistic UI updates after mutations"
+title: "Update mutations and automatic cache updates"
 ---
 
 We can notice that there is a lag when users create a todo.

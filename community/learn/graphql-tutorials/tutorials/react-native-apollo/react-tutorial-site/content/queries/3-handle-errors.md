@@ -1,5 +1,5 @@
 ---
-title: "Handle loading/errors"
+title: "Handle loading/errorrs"
 ---
 
 As we saw in the previous step, Apollo injected props into the component’s render prop function. Among them `loading` and `error` are common ones that you will need to handle in your app.
@@ -8,20 +8,42 @@ Now let's go back to the `<Query>` component that you wrote in the previous step
 
 ```javascript
 
-  <Query query={GET_MY_TODOS}>
-    {({ loading, error, data, client}) => {
-      if (loading) {
-        return (<div>Loading...</div>);
-      }
+<Query
+  query={FETCH_TODOS}
+  variables={{isPublic: this.props.isPublic}}
+>
+  {
+    ({data, error, loading }) => {
       if (error) {
         console.error(error);
-        return (<div>Error!</div>);
+        return <Text>Error</Text>;
       }
-      return (<TodoPrivateList client={client} todos={data.todos} />);
-    }}
-  </Query>
 
+      if (loading) {
+        return <CenterSpinner />;
+      }
+
+      return (
+        <View style={styles.container}>
+        <LoadNewer show={this.state.newTodosExist && isPublic} toggleShow={this.dismissNewTodoBanner} styles={styles} isPublic={this.props.isPublic}/>
+          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContainer}>
+            <FlatList
+              data={data.todos}
+              renderItem={({item}) => <TodoItem item={item} isPublic={this.props.isPublic}/>}
+              keyExtractor={(item) => item.id.toString()}
+            />
+            <LoadOlder
+              isPublic={this.props.isPublic}
+              styles={styles}
+            />
+          </ScrollView>
+        </View>
+      );
+    }
+  }
+</Query>
 ```
+
 
 When this component mounts, the GraphQL query sent in the background may not have been completed. But we need to handle that temporary state of no data and hence we return some useful text during `loading` state. 
 In this loading state, typically you can do fancy things like displaying a loading spinner.
