@@ -13,7 +13,7 @@ import CenterSpinner from './components/CenterSpinner';
 import MenuButton from '../components/MenuButton';
 
 // GraphQL subscription to subscribe to online users
-const subscribeToOnlineUsers = gql`
+const SUBSCRIBE_TO_ONLINE_USERS = gql`
   subscription {
     online_users(order_by: {user: {name: asc}}) {
       user {
@@ -38,7 +38,7 @@ export default class OnlineUsers extends React.Component {
     return (
       <View style={styles.container}>
         <Subscription
-          subscription={subscribeToOnlineUsers}
+          subscription={SUBSCRIBE_TO_ONLINE_USERS}
         >
           {
             ({data, loading, error}) => {

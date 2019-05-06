@@ -41,12 +41,13 @@ const SUBSCRIBE_TO_NEW_TODOS = gql`
 subscription {
   todos (
     order_by: {
-      id: desc
+      created_at: desc
     }
     limit: 1
     where: { is_public: { _eq: true }}
   ) {
     id
+    created_at
   }
 }
 `;
@@ -61,10 +62,10 @@ export default class Todos extends React.Component {
   }
 
   async componentDidMount() {
-    this.SUBSCRIBE_TO_NEW_TODOS();
+    this.subscribeToNewTodos();
   }
 
-  SUBSCRIBE_TO_NEW_TODOS = () => {
+  subscribeToNewTodos = () => {
     const { client, isPublic } = this.props;
     if (isPublic) {
       client.subscribe({
