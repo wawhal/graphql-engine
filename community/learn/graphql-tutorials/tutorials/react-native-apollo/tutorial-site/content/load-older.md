@@ -9,7 +9,7 @@ In this app, we will implement the basic functionality of loading older todos on
 The ideal workflow to implement this feature would be:
 
 1. Start with loading only "n" items
-2. On "load more", fetch "n" more items older than the oldest item
+2. On "load more", fetch "n" more items older than the oldest local item
 3. Append the newly loaded items to apollo cache
 
 You will learn:

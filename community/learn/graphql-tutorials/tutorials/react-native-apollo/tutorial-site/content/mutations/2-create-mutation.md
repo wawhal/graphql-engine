@@ -37,7 +37,7 @@ Now let's do the integration part. Now add the following code below the other im
 + import { Mutation } from "react-apollo";
 ```
 
-We are importing the `Mutation` component from `react-apollo` and the graphql query we defined above to fetch the todo data.
+We are importing the `Mutation` component from `react-apollo`.
 
 Now, we will wrap the component with `Mutation` passing our graphql mutation constant that we imported. In the render method, add the following code:
 
@@ -64,8 +64,8 @@ render() {
 +              insertTodo({
 +               variables: { text, isPublic }
 +              });
-            }
--            return (
++            }
++            return (
               <View style={styles.inputContainer}>
                 <View style={styles.textboxContainer}>
                   <TextInput
@@ -81,19 +81,19 @@ render() {
                   </TouchableOpacity>
                 </View>
               </View>
--            );
--          }
--        }
--      </Mutation>
++            );
++          }
++        }
++      </Mutation>
     );
 }
 ```
 
-In the `<Mutation>` component defined above, the first argument of the render prop function is the mutate function; (insertTodo) in this case. Read more about the mutate function [here](https://www.apollographql.com/docs/react/essentials/mutations.html#render-prop)
+In the `<Mutation>` component defined above, the first argument of the render prop function is the mutate function(insertTodo) in this case. Read more about the mutate function [here](https://www.apollographql.com/docs/react/essentials/mutations.html#render-prop).
 
 The mutate function optionally takes variables, optimisticResponse, refetchQueries, and update; You are going to make use of the `update` function later.
 
-We are passing the mutate function (`addTodo`) to our Button's `onPress` handler. We are also passing the query variables that is `text` and `isPublic` to this mutate function so that our mutation is called with those variables. `text` is the value of the input box while `isPublic`, which is the type of the todo, is taken from props.
+We are passing the mutate function (`insertTodo`) to our Button's `onPress` handler. We are also passing the query variables that is `text` and `isPublic` to this mutate function so that our mutation is called with those variables. `text` is the value of the input box while `isPublic`, which is the type of the todo, is taken from props.
 
 The mutation has been integrated and the new todos will be inserted into the database. But the UI doesn't know that a new todo has been added. We need a way to tell Apollo Client to update the query for the list of todos.
 

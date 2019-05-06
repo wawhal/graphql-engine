@@ -25,10 +25,14 @@ Let's define a graphql query to do a mutation into todos.
         is_completed
         created_at
         is_public
+        user {
+          name
+        }
       }
     }
   }
 ```
+
 You will also need to pass in the values for the variables.
 
 [Try](https://learn.hasura.io/graphql/graphiql) this mutation in GraphiQL against the application database to see what the response looks like.

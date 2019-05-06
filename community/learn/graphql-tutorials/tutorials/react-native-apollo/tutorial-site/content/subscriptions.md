@@ -19,7 +19,7 @@ We need to tell the server that the user who is logged in is online. We have to 
 
 We have to make this change to see yourself online first. Remember that you are already logged in, registered your data in the server, but not updated your `last_seen` value.?
 
-The goal is to update every few seconds from the client that you are online. Ideally you should do this after you have successfully authenticated with Auth0. So let's do in the entrypoint of the app i.e. `src/Navigation/Main.js`. We instantiate `client` in `componentDidMount`. Thats where we want to start polling. Firstly, lets define the mutation that sets `last_seen` to the current timestamp.
+The goal is to update every few seconds from the client that you are online. Ideally you should do this after you have successfully authenticated with Auth0. So let's do in the entrypoint of the app i.e. `src/navigation/Main.js`. We instantiate `client` in `componentDidMount`. Thats where we want to start polling. Firstly, lets define the mutation that sets `last_seen` to the current timestamp.
 
 ```javascript
 + import gql from "graphql-tag";
@@ -61,7 +61,7 @@ async componentDidMount() {
 +       userId: id
 +     }
 +   }),
-+   5000
++   30000
 + );
 }
 ```

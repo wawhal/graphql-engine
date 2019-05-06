@@ -5,8 +5,9 @@ const forcedNavOrder = [
     "/setup",
     "/apollo-client",
     "/queries",
-    "/mutations-variables",
-    "/optimistic-update-mutations",
+    "/mutations",
+    "/update-delete-mutations",
+    "/load-older",
     "/subscriptions",
     "/realtime-feed",
     "/what-next"
