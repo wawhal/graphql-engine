@@ -10,33 +10,36 @@ When we had initially set up Apollo, we used Apollo Boost to install the require
 
 Now we need to update our `ApolloClient` instance to point to the subscription server.
 
-Open `src/App.js` and update the following imports:
+Open `src/apollo.js` and update the following imports:
 
 ```javascript
 - import { HttpLink } from 'apollo-link-http';
 + import { WebSocketLink } from 'apollo-link-ws';
 ```
 
-Update the createApolloClient function to integrate WebSocketLink.
+Update the `makeApolloClient` function to integrate WebSocketLink.
 
 ```javascript
-const createApolloClient = (authToken) => {
-  return new ApolloClient({
--   link: new HttpLink({
-+   link: new WebSocketLink({
-      uri: 'https://learn.hasura.io/graphql',
-+     options: {
-+       reconnect: true,
-+       connectionParams: {
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          }
-        }
-      }
-    }),
-    cache: new InMemoryCache(),
-  });
-};
+
+  // create an apollo link instance, a network interface for apollo client
+-  const link = new HttpLink({
+-    uri: `https://learn.hasura.io/graphql`,
+-    headers: {
+-      Authorization: `Bearer ${token}`
+-    }
+-  });
+
++ const link = new WebSocketLink({
++   uri: `wss://learn.hasura.io/graphql`,
++   options: {
++     reconnect: true,
++     connectionParams: {
++       headers: {
++         Authorization: `Bearer ${token}`
++       }
++     }
++   }
++ })
 ```
 
 Note that we are replacing HttpLink with WebSocketLink and hence all GraphQL queries go through a single websocket connection.

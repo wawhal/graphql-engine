@@ -19,66 +19,51 @@ We need to tell the server that the user who is logged in is online. We have to 
 
 We have to make this change to see yourself online first. Remember that you are already logged in, registered your data in the server, but not updated your `last_seen` value.?
 
-The goal is to update every few seconds from the client that you are online. Ideally you should do this after you have successfully authenticated with Auth0. So let's update some code to handle this. 
-
-Open `src/components/OnlineUsers/OnlineUsersWrapper.js` and add the following imports:
+The goal is to update every few seconds from the client that you are online. Ideally you should do this after you have successfully authenticated with Auth0. So let's do in the entrypoint of the app i.e. `src/Navigation/Main.js`. We instantiate `client` in `componentDidMount`. Thats where we want to start polling. Firstly, lets define the mutation that sets `last_seen` to the current timestamp.
 
 ```javascript
-import gql from "graphql-tag";
++ import gql from "graphql-tag";
+
+
++ // GraphQL mutation to update last_seen
++ const emitOnlineEvent = gql`
++ mutation {
++   update_users(
++     _set: {
++       last_seen: "now()"
++     },
++     where: {}
++   ) {
++     affected_rows
++   }
++ }
++`;
 ```
 
-Now set the client prop in the constructor
-
-```javascript
-+ import {withApollo} from 'react-apollo';
-class OnlineUsersWrapper extends Component {
-- constructor() {
-+ constructor(props) {
--   super();
-+   super(props);
-+   this.client = props.client;
-
-    this.state = {
-      onlineUsers: [
-        { name: "someUser1" },
-        { name: "someUser2" }
-      ]
-    };
-  }
-```
-
-Update the export by wrapping the OnlineUsersWrapper component with `withApollo`
-
-```javascript
-- export default OnlineUsersWrapper;
-+ export default withApollo(OnlineUsersWrapper);
-```
 
 In `componentDidMount`, we will create a `setInterval` to update the last_seen of the user every 30 seconds.
 
 ```javascript
-  componentDidMount() {
-    // Every 30s, run a mutation to tell the backend that you're online
-    this.onlineIndicator = setInterval(() => this.updateLastSeen(), 30000);
-  }
-```
-
-Now let's write the definition of the `updateLastSeen`.
-
-```javascript
-  updateLastSeen() {
-    // Use the apollo client to run a mutation to update the last_seen value
-    const UPDATE_LASTSEEN_MUTATION=gql`
-      mutation updateLastSeen ($now: timestamptz!) {
-        update_users(where: {}, _set: {last_seen: $now}) {
-          affected_rows
-        }
-      }`;
-    this.client.mutate({
-      mutation: UPDATE_LASTSEEN_MUTATION,
-      variables: {now: (new Date()).toISOString()}
-    });
-  }
+// bootstrap session in componentDidMount
+async componentDidMount() {
+  // fetch session
+  const session = await AsyncStorage.getItem('@todo-graphql:auth0');
+  const sessionObj = JSON.parse(session);
+  const { token, id } = sessionObj;
+  // make apollo client with this session token
+  const client = makeApolloClient(token);
+  // start emitting events saying that the useri s online
+  this.setState({ client });
++ setInterval(
++   () => client.mutate({
++     mutation: emitOnlineEvent,
++     variables: {
++       userId: id
++     }
++   }),
++   5000
++ );
+}
 ```
 
 Again, we are making use of `client.mutate` to update the `users` table of the database.
