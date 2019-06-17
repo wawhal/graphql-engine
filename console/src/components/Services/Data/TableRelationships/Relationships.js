@@ -319,6 +319,7 @@ class Relationships extends Component {
       dispatch,
       relAdd,
       remoteRelationships,
+      remoteSchemas,
       manualRelAdd,
       currentSchema,
       migrationMode,
@@ -453,6 +454,7 @@ class Relationships extends Component {
                   remoteRelationships={remoteRelationships}
                   dispatch={dispatch}
                   tableSchema={tableSchema}
+                  remoteSchemas={remoteSchemas}
                 />
               </div>
             ) : (
@@ -490,6 +492,7 @@ Relationships.propTypes = {
   lastSuccess: PropTypes.bool,
   dispatch: PropTypes.func.isRequired,
   serverVersion: PropTypes.string,
+  remoteSchemas: PropTypes.array.isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => ({
@@ -499,6 +502,7 @@ const mapStateToProps = (state, ownProps) => ({
   migrationMode: state.main.migrationMode,
   serverVersion: state.main.serverVersion,
   schemaList: state.tables.schemaList,
+  remoteSchemas: state.customResolverData.listData.resolvers.map(r => r.name),
   ...state.tables.modify,
 });
 
