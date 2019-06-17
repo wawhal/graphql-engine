@@ -16,6 +16,7 @@ import           Hasura.RQL.DDL.QueryCollection
 import           Hasura.RQL.DDL.QueryTemplate
 import           Hasura.RQL.DDL.Relationship
 import           Hasura.RQL.DDL.Relationship.Rename
+import           Hasura.RQL.DDL.Remote.Types
 import           Hasura.RQL.DDL.RemoteSchema
 import           Hasura.RQL.DDL.Schema.Function
 import           Hasura.RQL.DDL.Schema.Table
@@ -44,6 +45,9 @@ data RQLQuery
   | RQDropRelationship !DropRel
   | RQSetRelationshipComment !SetRelComment
   | RQRenameRelationship !RenameRel
+
+  | RQCreateRemoteRelationship !RemoteRelationship
+  | RQDeleteRemoteRelationship !DeleteRemoteRelationship
 
   | RQCreateInsertPermission !CreateInsPerm
   | RQCreateSelectPermission !CreateSelPerm
@@ -192,6 +196,9 @@ queryNeedsReload qi = case qi of
   RQSetRelationshipComment  _     -> False
   RQRenameRelationship _          -> True
 
+  RQCreateRemoteRelationship _    -> True
+  RQDeleteRemoteRelationship _    -> True
+
   RQCreateInsertPermission _      -> True
   RQCreateSelectPermission _      -> True
   RQCreateUpdatePermission _      -> True
@@ -262,6 +269,9 @@ runQueryM rq = withPathK "args" $ case rq of
   RQDropRelationship  q        -> runDropRel q
   RQSetRelationshipComment  q  -> runSetRelComment q
   RQRenameRelationship q       -> runRenameRel q
+
+  RQCreateRemoteRelationship q -> runCreateRemoteRelationship q
+  RQDeleteRemoteRelationship q -> runDeleteRemoteRelationship q
 
   RQCreateInsertPermission q   -> runCreatePerm q
   RQCreateSelectPermission q   -> runCreatePerm q

@@ -1,0 +1,15 @@
+type: bulk
+args:
+  - type: create_remote_relationship
+    args:
+      name: messages
+      table: profiles
+      hasura_fields:
+        - id
+      remote_schema: my-remote-schema
+      remote_field:
+        messages:
+          arguments:
+            where:
+              id:
+                eq: "$id"

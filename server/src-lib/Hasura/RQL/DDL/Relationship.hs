@@ -1,3 +1,5 @@
+{-# LANGUAGE ViewPatterns #-}
+
 module Hasura.RQL.DDL.Relationship
   ( validateObjRel
   , objRelP2Setup
@@ -11,11 +13,17 @@ module Hasura.RQL.DDL.Relationship
   , runCreateArrRel
   , runDropRel
   , runSetRelComment
+  , runCreateRemoteRelationship
+  , runDeleteRemoteRelationship
   , module Hasura.RQL.DDL.Relationship.Types
   )
 where
 
 import qualified Database.PG.Query                 as Q
+import           Hasura.GraphQL.Validate.Types
+import           Hasura.RQL.DDL.Remote.Types
+import           Hasura.RQL.DDL.Remote.Validate
+import           Hasura.RQL.Types.Common
 
 import           Hasura.EncJSON
 import           Hasura.Prelude
@@ -29,6 +37,7 @@ import           Data.Aeson.Types
 import qualified Data.HashMap.Strict               as HM
 import qualified Data.HashSet                      as HS
 import qualified Data.Map.Strict                   as M
+import qualified Data.Set                          as Set
 import qualified Data.Text                         as T
 import           Data.Tuple                        (swap)
 import           Instances.TH.Lift                 ()
@@ -149,6 +158,89 @@ createObjRelP2
 createObjRelP2 (WithTable qt rd) = do
   objRelP2 qt rd
   return successMsg
+
+runCreateRemoteRelationship ::
+     (MonadTx m, CacheRWM m) => RemoteRelationship -> m EncJSON
+runCreateRemoteRelationship remoteRelationship = do
+  (remoteField, additionalTypesMap) <-
+    runCreateRemoteRelationshipP1 remoteRelationship
+  runCreateRemoteRelationshipP2 remoteField additionalTypesMap
+
+runCreateRemoteRelationshipP1 ::
+     (MonadTx m, CacheRM m) => RemoteRelationship -> m (RemoteField, TypeMap)
+runCreateRemoteRelationshipP1 remoteRelationship = do
+  sc <- askSchemaCache
+  case HM.lookup
+         (rtrRemoteSchema remoteRelationship)
+         (scRemoteResolvers sc) of
+    Just {} -> do
+      validation <-
+        getCreateRemoteRelationshipValidation remoteRelationship
+      case validation of
+        Left err -> throw400 RemoteSchemaError (T.pack (show err))
+        Right (remoteField, additionalTypesMap) ->
+          pure (remoteField, additionalTypesMap)
+    Nothing -> throw400 RemoteSchemaError "No such remote schema"
+
+runCreateRemoteRelationshipP2 ::
+     (MonadTx m, CacheRWM m) => RemoteField -> TypeMap -> m EncJSON
+runCreateRemoteRelationshipP2 remoteField additionalTypesMap = do
+  liftTx (persistRemoteRelationship (rmfRemoteRelationship remoteField))
+  addRemoteRelToCache remoteField additionalTypesMap schemaDependencies
+  pure successMsg
+  where
+    schemaDependencies =
+      let table = rtrTable $ rmfRemoteRelationship remoteField
+          columns = rtrHasuraFields $ rmfRemoteRelationship remoteField
+          remoteSchemaName = rtrRemoteSchema $ rmfRemoteRelationship remoteField
+          tableDep = SchemaDependency (SOTable table) "hasura table"
+          columnsDep =
+            map
+              (\column ->
+                 SchemaDependency
+                   (SOTableObj table $ TOCol column)
+                   "remote relationship join column") $
+            map (\(getFieldNameTxt -> name) -> PGCol name) (Set.toList columns)
+          remoteSchemaDep =
+            SchemaDependency (SORemoteSchema remoteSchemaName) "remote schema"
+       in (tableDep : remoteSchemaDep : columnsDep)
+
+persistRemoteRelationship
+  :: RemoteRelationship -> Q.TxE QErr ()
+persistRemoteRelationship remoteRelationship =
+  Q.unitQE defaultTxErrorHandler [Q.sql|
+  INSERT INTO hdb_catalog.hdb_remote_relationship
+  (name, table_schema, table_name, remote_schema, configuration)
+  VALUES ($1, $2, $3, $4, $5 :: jsonb)
+  |]
+  (let QualifiedObject schema_name table_name = rtrTable remoteRelationship
+   in (rtrName remoteRelationship
+      ,schema_name
+      ,table_name
+      ,rtrRemoteSchema remoteRelationship
+      ,Q.JSONB (toJSON (remoteRelationship))))
+  True
+
+runDeleteRemoteRelationship ::
+     (MonadTx m, CacheRWM m, UserInfoM m) => DeleteRemoteRelationship -> m EncJSON
+runDeleteRemoteRelationship (DeleteRemoteRelationship table relName)= do
+  adminOnly
+  delRemoteRelFromCache table relName
+  liftTx $ delRemoteRelFromCatalog table relName
+  return successMsg
+
+delRemoteRelFromCatalog
+  :: QualifiedTable
+  -> RemoteRelationshipName
+  -> Q.TxE QErr ()
+delRemoteRelFromCatalog (QualifiedObject sn tn) (RemoteRelationshipName relName) =
+  Q.unitQE defaultTxErrorHandler [Q.sql|
+           DELETE FROM
+                  hdb_catalog.hdb_remote_relationship
+           WHERE table_schema =  $1
+             AND table_name = $2
+             AND name = $3
+                |] (sn, tn, relName) True
 
 runCreateObjRel
   :: (QErrM m, CacheRWM m, MonadTx m , UserInfoM m)
