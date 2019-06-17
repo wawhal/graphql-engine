@@ -19,6 +19,7 @@ import { getRelDef, getObjArrRelList } from './utils';
 
 import Button from '../../../Common/Button/Button';
 import AddManualRelationship from './AddManualRelationship';
+import RemoteRelationships from './RemoteRelationships';
 import suggestedRelationshipsRaw from './autoRelations';
 import RelationshipEditor from './RelationshipEditor';
 
@@ -317,6 +318,7 @@ class Relationships extends Component {
       lastSuccess,
       dispatch,
       relAdd,
+      remoteRelationships,
       manualRelAdd,
       currentSchema,
       migrationMode,
@@ -445,6 +447,12 @@ class Relationships extends Component {
                   schemaList={schemaList}
                   relAdd={manualRelAdd}
                   dispatch={dispatch}
+                />
+                <hr />
+                <RemoteRelationships
+                  remoteRelationships={remoteRelationships}
+                  dispatch={dispatch}
+                  tableSchema={tableSchema}
                 />
               </div>
             ) : (
