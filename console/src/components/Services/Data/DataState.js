@@ -1,3 +1,5 @@
+import { defaultRemoteRelationship } from './TableRelationships/Actions';
+
 const defaultCurFilter = {
   where: { $and: [{ '': { '': '' } }] },
   limit: 10,
@@ -122,6 +124,11 @@ const defaultModifyState = {
     colMappings: [{ column: '', refColumn: '' }],
     isToggled: false,
   },
+  remoteRelationships: [
+    {
+      ...defaultRemoteRelationship,
+    },
+  ],
   permissionsState: { ...defaultPermissionsState },
   prevPermissionState: { ...defaultPermissionsState },
   ongoingRequest: false,
