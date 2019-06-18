@@ -610,6 +610,7 @@ const modifyReducer = (tableName, schemas, modifyStateOrig, action) => {
           ...modifyState.remoteRelationships,
           loading: false,
           remoteSchema: {
+            ...modifyState.remoteRelationships.remoteSchema,
             [action.schemaName]: action.schema,
           },
         },
