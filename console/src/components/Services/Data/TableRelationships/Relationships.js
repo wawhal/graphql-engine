@@ -428,8 +428,12 @@ class Relationships extends Component {
         />
         <br />
         <div className={`${styles.padd_left_remove} container-fluid`}>
-          <div className={`${styles.padd_left_remove} col-xs-10 col-md-10`}>
-            <h4 className={styles.subheading_text}>Relationships</h4>
+          <div
+            className={`${styles.padd_left_remove} col-xs-10 col-md-10 ${
+              styles.add_mar_bottom
+            }`}
+          >
+            <h4 className={styles.subheading_text}>Table Relationships</h4>
             {addedRelationshipsView}
             <br />
             {relAdd.isActive ? (
@@ -449,13 +453,6 @@ class Relationships extends Component {
                   relAdd={manualRelAdd}
                   dispatch={dispatch}
                 />
-                <hr />
-                <RemoteRelationships
-                  remoteRelationships={remoteRelationships}
-                  dispatch={dispatch}
-                  tableSchema={tableSchema}
-                  remoteSchemas={remoteSchemas}
-                />
               </div>
             ) : (
               <Button
@@ -469,6 +466,15 @@ class Relationships extends Component {
                 + Add relationship
               </Button>
             )}
+          </div>
+          <div className={`${styles.padd_left_remove} col-xs-10 col-md-10`}>
+            <h4 className={styles.subheading_text}>Remote Relationships</h4>
+            <RemoteRelationships
+              remoteRelationships={remoteRelationships}
+              dispatch={dispatch}
+              tableSchema={tableSchema}
+              remoteSchemas={remoteSchemas}
+            />
           </div>
         </div>
         <div className={`${styles.fixed} hidden`}>{alert}</div>
