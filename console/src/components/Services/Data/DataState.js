@@ -127,6 +127,7 @@ const defaultModifyState = {
   remoteRelationships: {
     remoteSchema: {},
     relationships: [{ ...defaultRemoteRelationship }],
+    fetchedRemoteRelationships: false,
   },
   permissionsState: { ...defaultPermissionsState },
   prevPermissionState: { ...defaultPermissionsState },
