@@ -317,7 +317,7 @@ const loadSchema = configOptions => {
         let remoteRelationships = [];
 
         // if (featuresCompatibility.RemoteRelationShips) {
-        remoteRelationships = JSON.parse(data[4].result[1]);
+        remoteRelationships = data[4];
         // }
 
         const mergedData = mergeLoadSchemaData(
