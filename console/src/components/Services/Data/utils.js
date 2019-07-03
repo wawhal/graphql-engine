@@ -423,46 +423,6 @@ FROM
   };
 };
 
-export const fetchTrackedTableRemoteRelationshipQuery = options => {
-  const whereQuery = generateWhereClause(options);
-
-  const runSql = `select 
-  COALESCE(
-    json_agg(
-      row_to_json(info)
-    ), 
-    '[]' :: JSON
-  ) AS tables 
-FROM 
-  (
-    select
-      ist.table_schema,
-      ist.table_name,
-      hdb_remote_rel.name,
-      hdb_remote_rel.remote_schema,
-      hdb_remote_rel.configuration
-    from 
-      hdb_catalog.hdb_table AS ist 
-      JOIN hdb_catalog.hdb_remote_relationship AS hdb_remote_rel ON hdb_remote_rel.table_schema = ist.table_schema 
-      and hdb_remote_rel.table_name = ist.table_name
-    ${whereQuery}
-  ) as info
-`;
-
-  const query = {
-    type: 'select',
-    args: {
-      table: {
-        schema: 'hdb_catalog',
-        name: 'hdb_remote_relationship',
-      },
-      columns: ['*.*'],
-      where: generateWhereObject(options),
-    },
-  };
-  return query;
-};
-
 const generateWhereObject = options => {
   const where = {};
   if (options.schemas) {
@@ -484,6 +444,21 @@ const generateWhereObject = options => {
     });
   }
   return where;
+};
+
+export const fetchTrackedTableRemoteRelationshipQuery = options => {
+  const query = {
+    type: 'select',
+    args: {
+      table: {
+        schema: 'hdb_catalog',
+        name: 'hdb_remote_relationship',
+      },
+      columns: ['*.*'],
+      where: generateWhereObject(options),
+    },
+  };
+  return query;
 };
 
 export const mergeLoadSchemaData = (
