@@ -18,7 +18,6 @@ import gqlPattern, { gqlRelErrorNotif } from '../Common/GraphQLValidation';
 import { getRelDef, getObjArrRelList } from './utils';
 
 import Button from '../../../Common/Button/Button';
-import Globals from '../../../../Globals';
 import { FT_REMOTE_RELATIONSHIPS } from '../../../../helpers/versionUtils';
 import AddManualRelationship from './AddManualRelationship';
 import RemoteRelationships from './RemoteRelationships/RemoteRelationships';
@@ -317,6 +316,7 @@ const Relationships = ({
   currentSchema,
   migrationMode,
   schemaList,
+  featuresCompatibility,
 }) => {
   useEffect(() => {
     dispatch({ type: RESET });
@@ -328,6 +328,12 @@ const Relationships = ({
   const tableSchema = allSchemas.find(
     t => t.table_name === tableName && t.table_schema === currentSchema
   );
+
+  if (!tableSchema) {
+    // throw a 404 exception
+    throw new NotFoundError();
+  }
+
   let alert = null;
   if (ongoingRequest) {
     alert = (
@@ -335,98 +341,26 @@ const Relationships = ({
         Saving...
       </div>
     );
-
-    if (!tableSchema) {
-      // throw a 404 exception
-      throw new NotFoundError();
-    }
-
-    let alert = null;
-    if (ongoingRequest) {
-      alert = (
-        <div className="hidden alert alert-warning" role="alert">
-          Saving...
-        </div>
-      );
-    } else if (lastError) {
-      alert = (
-        <div className="hidden alert alert-danger" role="alert">
-          Error: {JSON.stringify(lastError)}
-        </div>
-      );
-    } else if (lastSuccess) {
-      alert = (
-        <div className="hidden alert alert-success" role="alert">
-          Saved!
-        </div>
-      );
-    } else if (lastFormError) {
-      alert = (
-        <div className="hidden alert alert-warning" role="alert">
-          {lastFormError}
-        </div>
-      );
-    }
-
-    const objArrRelList = getObjArrRelList(tableSchema.relationships);
-
-    let addedRelationshipsView = null;
-    if (objArrRelList.length > 0) {
-      addedRelationshipsView = (
-        <div className={tableStyles.tableContainer}>
-          <table
-            className={`${
-              tableStyles.table
-            } table table-bordered table-striped table-hover`}
-          >
-            <thead>
-              <tr>
-                {['Object relationships', 'Array relationships'].map((s, i) => (
-                  <th key={i}>{s}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {objArrRelList.map(rel => {
-                const column1 = rel.objRel ? (
-                  <RelationshipEditor
-                    dispatch={dispatch}
-                    key={rel.objRel.rel_name}
-                    relConfig={findAllFromRel(
-                      allSchemas,
-                      tableSchema,
-                      rel.objRel
-                    )}
-                  />
-                ) : (
-                  <td />
-                );
-                const column2 = rel.arrRel ? (
-                  <RelationshipEditor
-                    key={rel.arrRel.rel_name}
-                    dispatch={dispatch}
-                    relConfig={findAllFromRel(
-                      allSchemas,
-                      tableSchema,
-                      rel.arrRel
-                    )}
-                  />
-                ) : (
-                  <td />
-                );
-                return (
-                  <tr>
-                    {column1}
-                    {column2}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
+  } else if (lastError) {
+    alert = (
+      <div className="hidden alert alert-danger" role="alert">
+        Error: {JSON.stringify(lastError)}
+      </div>
+    );
+  } else if (lastSuccess) {
+    alert = (
+      <div className="hidden alert alert-success" role="alert">
+        Saved!
+      </div>
+    );
+  } else if (lastFormError) {
+    alert = (
+      <div className="hidden alert alert-warning" role="alert">
+        {lastFormError}
+      </div>
+    );
   }
+
   const objArrRelList = getObjArrRelList(tableSchema.relationships);
 
   let addedRelationshipsView = null;
@@ -487,12 +421,7 @@ const Relationships = ({
   }
 
   const remoteRelationshipsSection = () => {
-    const { featuresCompatibility } = Globals;
-    console.log(featuresCompatibility);
-    if (
-      !featuresCompatibility ||
-      (featuresCompatibility && !featuresCompatibility[FT_REMOTE_RELATIONSHIPS])
-    ) {
+    if (!featuresCompatibility[FT_REMOTE_RELATIONSHIPS]) {
       return null;
     }
     return (
