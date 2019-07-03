@@ -252,7 +252,8 @@ const loadSchema = configOptions => {
   return (dispatch, getState) => {
     const url = Endpoints.getSchema;
 
-    const featuresCompatibility = getState().main.featuresCompatibility;
+    const featuresCompatibility =
+      globals.featuresCompatibility || getState().main.featuresCompatibility;
 
     let allSchemas = getState().tables.allSchemas;
 
@@ -298,9 +299,9 @@ const loadSchema = configOptions => {
       ],
     };
 
-    //if (featuresCompatibility[FT_REMOTE_RELATIONSHIPS]) {
-    body.args.push(fetchTrackedTableRemoteRelationshipQuery(configOptions));
-    //}
+    if (featuresCompatibility[FT_REMOTE_RELATIONSHIPS]) {
+      body.args.push(fetchTrackedTableRemoteRelationshipQuery(configOptions));
+    }
 
     const options = {
       credentials: globalCookiePolicy,
@@ -316,9 +317,9 @@ const loadSchema = configOptions => {
         const refFkList = JSON.parse(data[3].result[1]);
         let remoteRelationships = [];
 
-        // if (featuresCompatibility.RemoteRelationShips) {
-        remoteRelationships = data[4];
-        // }
+        if (featuresCompatibility[FT_REMOTE_RELATIONSHIPS]) {
+          remoteRelationships = data[4];
+        }
 
         const mergedData = mergeLoadSchemaData(
           tableList,
