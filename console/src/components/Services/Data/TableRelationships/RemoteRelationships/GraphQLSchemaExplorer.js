@@ -5,7 +5,10 @@ import { getSchemaTree } from '../utils';
 import ExplorerItem from './ExplorerItem';
 import { NoRemoteSchemaPlaceholder, LoadingSkeleton } from './Placeholders';
 import { introspectRemoteSchema } from '../Actions';
-import { remoteSchemaCache, cacheGraphQLSchema } from './cache';
+import {
+  remoteSchemaCache,
+  cacheRemoteSchema,
+} from '../../../../../utils/cache';
 
 const SchemaExplorer = ({
   relationship,
@@ -23,7 +26,7 @@ const SchemaExplorer = ({
       if (!remoteSchemaCache[relationship.remoteSchema]) {
         const introspectionCallback = introspectionResult => {
           const clientSchema = buildClientSchema(introspectionResult.data);
-          cacheGraphQLSchema(relationship.remoteSchema, clientSchema);
+          cacheRemoteSchema(relationship.remoteSchema, clientSchema);
           setRemoteSchema(clientSchema);
         };
         dispatch(
