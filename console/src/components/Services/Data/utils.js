@@ -467,17 +467,17 @@ const generateWhereObject = options => {
   const where = {};
   if (options.schemas) {
     options.schemas.forEach(s => {
-      if (!where['$and']) where['$and'] = [];
+      if (!where.$and) where.$and = [];
 
-      where['$and'].push({
+      where.$and.push({
         table_schema: s,
       });
     });
   }
   if (options.tables) {
     options.schemas.forEach(t => {
-      if (!where['$and']) where['$and'] = [];
-      where['$and'].push({
+      if (!where.$and) where.$and = [];
+      where.$and.push({
         table_schema: t.table_schema,
         table_name: t.table_name,
       });
