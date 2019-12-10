@@ -39,5 +39,5 @@ export const getActionPermissions = action => {
 };
 
 export const findActionPermission = (perms, role) => {
-  return perms.find(p => p.role === role);
+  return perms.find(p => p.role_name === role);
 };
