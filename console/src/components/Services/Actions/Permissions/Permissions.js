@@ -7,6 +7,7 @@ import { permissionsSymbols } from '../../../Common/Permissions/PermissionSymbol
 import { permOpenEdit, permCloseEdit, permSetRoleName } from './reducer';
 import styles from '../../../Common/Permissions/PermissionStyles.scss';
 import PermissionEditor from './PermissionEditor';
+import { setDefaults } from './reducer';
 
 const queryTypes = ['Permission'];
 
@@ -20,6 +21,9 @@ const Permissions = ({
 }) => {
   React.useEffect(() => {
     dispatch(fetchRoleList());
+    return () => {
+      dispatch(setDefaults());
+    };
   }, []);
 
   const allPermissions = getActionPermissions(currentAction);

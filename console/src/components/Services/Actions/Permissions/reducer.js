@@ -7,7 +7,7 @@ export const setActionPermissiosn = perms => ({
   perms,
 });
 
-const PERMISSIONS_OPEN_EDIT = 'Actions/PERMISSIONS_OPEN_EDIT';
+const PERMISSIONS_OPEN_EDIT = 'Actions/Permissions/PERMISSIONS_OPEN_EDIT';
 export const permOpenEdit = (role, isNewRole, isNewPerm) => ({
   type: PERMISSIONS_OPEN_EDIT,
   role,
@@ -15,15 +15,20 @@ export const permOpenEdit = (role, isNewRole, isNewPerm) => ({
   isNewPerm,
 });
 
-const PERMISSIONS_CLOSE_EDIT = 'Actions/PERMISSIONS_CLOSE_EDIT';
+const PERMISSIONS_CLOSE_EDIT = 'Actions/Permissions/PERMISSIONS_CLOSE_EDIT';
 export const permCloseEdit = () => ({
   type: PERMISSIONS_CLOSE_EDIT,
 });
 
-const SET_ROLE_NAME = 'Actions/SET_ROLE_NAME';
+const SET_ROLE_NAME = 'Actions/Permissions/SET_ROLE_NAME';
 export const permSetRoleName = rolename => ({
   type: SET_ROLE_NAME,
   rolename,
+});
+
+const SET_DEFAULTS = 'Actions/Permissions/SET_DEFAULTS';
+export const setDefaults = () => ({
+  type: SET_DEFAULTS,
 });
 
 const reducer = (state = defaultState, action) => {
@@ -60,6 +65,8 @@ const reducer = (state = defaultState, action) => {
           newRole: action.rolename,
         },
       };
+    case SET_DEFAULTS:
+      return defaultState;
     default:
       return state;
   }
