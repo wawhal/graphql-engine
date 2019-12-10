@@ -92,3 +92,14 @@ export const getSetCustomRootFieldsQuery = (
     },
   };
 };
+
+export const getFetchAllRolesQuery = () => ({
+  type: 'select',
+  args: {
+    table: {
+      schema: 'hdb_catalog',
+      name: 'hdb_permission_agg',
+    },
+    columns: ['role_name'],
+  },
+});
