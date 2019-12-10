@@ -103,3 +103,28 @@ export const getFetchAllRolesQuery = () => ({
     columns: ['role_name'],
   },
 });
+
+export const getCreateActionPermissionQuery = (def, actionName) => {
+  return {
+    type: 'create_action_permission',
+    args: {
+      action: actionName,
+      role: def.role,
+      definition: {
+        select: {
+          filter: def.filter,
+        },
+      },
+    },
+  };
+};
+
+export const getDropActionPermissionQuery = (role, actionName) => {
+  return {
+    type: 'drop_action_permission',
+    args: {
+      action: actionName,
+      role,
+    },
+  };
+};
