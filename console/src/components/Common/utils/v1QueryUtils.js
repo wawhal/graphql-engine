@@ -98,7 +98,7 @@ export const getFetchAllRolesQuery = () => ({
   args: {
     table: {
       schema: 'hdb_catalog',
-      name: 'hdb_permission_agg',
+      name: 'hdb_role',
     },
     columns: ['role_name'],
   },

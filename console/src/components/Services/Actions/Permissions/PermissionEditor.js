@@ -4,7 +4,12 @@ import styles from '../../../Common/Permissions/PermissionStyles.scss';
 import { saveActionPermission, removeActionPermission } from '../ServerIO';
 import { permCloseEdit } from './reducer';
 
-const PermissionEditor = ({ permissionEdit, isEditing, dispatch }) => {
+const PermissionEditor = ({
+  permissionEdit,
+  isEditing,
+  isFetching,
+  dispatch,
+}) => {
   if (!isEditing) return null;
 
   const permRole = permissionEdit.newRole || permissionEdit.role;
@@ -35,7 +40,12 @@ const PermissionEditor = ({ permissionEdit, isEditing, dispatch }) => {
       dispatch(saveActionPermission(closeEditor));
     };
     return (
-      <Button onClick={saveFunc} color="yellow" className={buttonStyle}>
+      <Button
+        onClick={saveFunc}
+        color="yellow"
+        className={buttonStyle}
+        disabled={isFetching}
+      >
         Save
       </Button>
     );
@@ -47,8 +57,13 @@ const PermissionEditor = ({ permissionEdit, isEditing, dispatch }) => {
       dispatch(removeActionPermission(closeEditor));
     };
     return (
-      <Button onClick={removeFunc} color="red" className={buttonStyle}>
-        Delete
+      <Button
+        onClick={removeFunc}
+        color="red"
+        className={buttonStyle}
+        disabled={isFetching}
+      >
+        Remove
       </Button>
     );
   };

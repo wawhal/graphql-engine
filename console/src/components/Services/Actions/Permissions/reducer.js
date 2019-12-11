@@ -31,8 +31,30 @@ export const setDefaults = () => ({
   type: SET_DEFAULTS,
 });
 
+const MAKE_REQUEST = 'Actions/Permissions/MAKE_REQUEST';
+export const makeRequest = () => ({ type: MAKE_REQUEST });
+const REQUEST_SUCCESS = 'Actions/Permissions/REQUEST_SUCCESS';
+export const setRequestSuccess = () => ({ type: REQUEST_SUCCESS });
+const REQUEST_FAILURE = 'Actions/Permissions/REQUEST_FAILURE';
+export const setRequestFailure = () => ({ type: REQUEST_FAILURE });
+
 const reducer = (state = defaultState, action) => {
   switch (action.type) {
+    case MAKE_REQUEST:
+      return {
+        ...state,
+        isFetching: true,
+      };
+    case REQUEST_SUCCESS:
+      return {
+        ...state,
+        isFetching: false,
+      };
+    case REQUEST_FAILURE:
+      return {
+        ...state,
+        isFetching: false,
+      };
     case PERMISSIONS_OPEN_EDIT:
       return {
         ...state,
@@ -49,13 +71,7 @@ const reducer = (state = defaultState, action) => {
       return {
         ...state,
         isEditing: false,
-        permissionEdit: {
-          ...state.permissionEdit,
-          isNewRole: false,
-          isNewPerm: false,
-          role: action.role,
-          filter: {},
-        },
+        permissionEdit: { ...defaultState.permissionEdit },
       };
     case SET_ROLE_NAME:
       return {

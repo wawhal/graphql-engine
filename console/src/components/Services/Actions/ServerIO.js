@@ -8,7 +8,7 @@ import {
   LOADING_ACTIONS_FAILURE,
 } from './reducer';
 import { filterInconsistentMetadataObjects } from '../Settings/utils';
-import { makeMigrationCall } from '../Data/DataActions';
+import { makeMigrationCall, fetchRoleList } from '../Data/DataActions';
 import {
   generateSetCustomTypesQuery,
   generateCreateActionQuery,
@@ -42,6 +42,12 @@ import {
   setFetching as modifyActionRequestInProgress,
   unsetFetching as modifyActionRequestComplete,
 } from './Modify/reducer';
+
+import {
+  makeRequest as makePermRequest,
+  setRequestSuccess as setPermRequestSuccess,
+  setRequestFailure as setPermRequestFailure
+} from './Permissions/reducer';
 import { findAction, getActionPermissions } from './utils';
 import { getActionPermissionQueries } from './Permissions/utils';
 
@@ -439,17 +445,20 @@ export const saveActionPermission = (successCb, errorCb) => (
 
   const customOnSuccess = () => {
     dispatch(fetchActions());
+    dispatch(fetchRoleList());
+    dispatch(setPermRequestSuccess());
     if (successCb) {
       successCb();
     }
   };
   const customOnError = () => {
+    dispatch(setPermRequestFailure());
     if (errorCb) {
       errorCb();
     }
   };
 
-  // dispatch(createActionRequestInProgress());
+  dispatch(makePermRequest());
   makeMigrationCall(
     dispatch,
     getState,
@@ -468,8 +477,11 @@ export const removeActionPermission = (successCb, errorCb) => (
   dispatch,
   getState
 ) => {
+  const isOk = getConfirmation('This will remove the permission for this role');
+  if (!isOk) return;
+
   const {
-    common: { actions: currentAction },
+    common: { currentAction },
     permissions: { permissionEdit },
   } = getState().actions;
 
@@ -488,17 +500,20 @@ export const removeActionPermission = (successCb, errorCb) => (
 
   const customOnSuccess = () => {
     dispatch(fetchActions());
+    dispatch(fetchRoleList());
+    dispatch(setPermRequestSuccess());
     if (successCb) {
       successCb();
     }
   };
   const customOnError = () => {
+    dispatch(setPermRequestFailure());
     if (errorCb) {
       errorCb();
     }
   };
 
-  // dispatch(createActionRequestInProgress());
+  dispatch(makePermRequest());
   makeMigrationCall(
     dispatch,
     getState,
