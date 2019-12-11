@@ -301,7 +301,7 @@ const RawSQL = ({
         <label>
           <input
             checked={isCascadeChecked}
-            className={styles.add_mar_right_small}
+            className={`${styles.add_mar_right_small} ${styles.cursorPointer}`}
             id="cascade-checkbox"
             type="checkbox"
             onChange={() => {
@@ -336,7 +336,7 @@ const RawSQL = ({
         <label>
           <input
             checked={isTableTrackChecked}
-            className={styles.add_mar_right_small}
+            className={`${styles.add_mar_right_small} ${styles.cursorPointer}`}
             id="track-checkbox"
             type="checkbox"
             onChange={dispatchTrackThis}

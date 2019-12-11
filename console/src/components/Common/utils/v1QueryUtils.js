@@ -128,3 +128,13 @@ export const getDropActionPermissionQuery = (role, actionName) => {
     },
   };
 };
+
+export const getRunSqlQuery = (sql, shouldCascade) => {
+  return {
+    type: 'run_sql',
+    args: {
+      sql,
+      cascade: !!shouldCascade,
+    },
+  };
+};
