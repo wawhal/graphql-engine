@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hasura/graphql-engine/cli/metadata/actions"
 	"github.com/hasura/graphql-engine/cli/telemetry"
 	"github.com/hasura/graphql-engine/cli/util"
 
@@ -53,6 +54,10 @@ type ServerConfig struct {
 	// AdminSecret (optional) required to query the endpoint
 	AdminSecret string
 
+	Action actions.ActionExecutionConfig
+
+	Scaffold *actions.ScaffoldExecutionConfig
+
 	ParsedEndpoint *url.URL
 }
 
@@ -63,6 +68,10 @@ type rawServerConfig struct {
 	AccessKey string `json:"access_key,omitempty"`
 	// AdminSecret (optional) Admin secret required to query the endpoint
 	AdminSecret string `json:"admin_secret,omitempty"`
+
+	Action actions.ActionExecutionConfig `json:"action"`
+
+	Scaffold *actions.ScaffoldExecutionConfig `json:"scaffold,omitempty"`
 
 	ParsedEndpoint *url.URL `json:"-"`
 }
@@ -76,6 +85,8 @@ func (r rawServerConfig) toServerConfig() ServerConfig {
 		Endpoint:       r.Endpoint,
 		AdminSecret:    s,
 		ParsedEndpoint: r.ParsedEndpoint,
+		Action:         r.Action,
+		Scaffold:       r.Scaffold,
 	}
 }
 
@@ -85,6 +96,8 @@ func (s ServerConfig) toRawServerConfig() rawServerConfig {
 		AccessKey:      "",
 		AdminSecret:    s.AdminSecret,
 		ParsedEndpoint: s.ParsedEndpoint,
+		Action:         s.Action,
+		Scaffold:       s.Scaffold,
 	}
 }
 
@@ -104,6 +117,8 @@ func (s ServerConfig) UnmarshalJSON(b []byte) error {
 	s.Endpoint = sc.Endpoint
 	s.AdminSecret = sc.AdminSecret
 	s.ParsedEndpoint = sc.ParsedEndpoint
+	s.Action = sc.Action
+	s.Scaffold = sc.Scaffold
 	return nil
 }
 
@@ -141,6 +156,8 @@ type ExecutionContext struct {
 	ExecutionDirectory string
 	// MigrationDir is the name of directory where migrations are stored.
 	MigrationDir string
+	// MetadataDir is the name of directory where metadata files are stored.
+	MetadataDir string
 	// ConfigFile is the file where endpoint etc. are stored.
 	ConfigFile string
 	// MetadataFile (optional) is a yaml|json file where Hasura metadata is stored.
@@ -255,6 +272,7 @@ func (ec *ExecutionContext) Validate() error {
 
 	// set names of files and directories
 	ec.MigrationDir = filepath.Join(ec.ExecutionDirectory, "migrations")
+	ec.MetadataDir = filepath.Join(ec.ExecutionDirectory, "metadata")
 	ec.ConfigFile = filepath.Join(ec.ExecutionDirectory, "config.yaml")
 	ec.MetadataFile = append(ec.MetadataFile, filepath.Join(ec.MigrationDir, "metadata.yaml"))
 	ec.MetadataFile = append(ec.MetadataFile, filepath.Join(ec.MigrationDir, "metadata.json"))
@@ -309,6 +327,9 @@ func (ec *ExecutionContext) readConfig() error {
 	v.SetDefault("endpoint", "http://localhost:8080")
 	v.SetDefault("admin_secret", "")
 	v.SetDefault("access_key", "")
+	v.SetDefault("action.kind", "synchronous")
+	v.SetDefault("action.webhook", "http://localhost:3000")
+	v.SetDefault("scaffold.output_dir", ec.ExecutionDirectory)
 	v.AddConfigPath(ec.ExecutionDirectory)
 	err := v.ReadInConfig()
 	if err != nil {
@@ -321,6 +342,15 @@ func (ec *ExecutionContext) readConfig() error {
 	ec.ServerConfig = &ServerConfig{
 		Endpoint:    v.GetString("endpoint"),
 		AdminSecret: adminSecret,
+		Action: actions.ActionExecutionConfig{
+			Kind:    v.GetString("action.kind"),
+			Webhook: v.GetString("action.webhook"),
+		},
+		Scaffold: &actions.ScaffoldExecutionConfig{
+			Default:           v.GetString("scaffold.default"),
+			OutputDir:         v.GetString("scaffold.output_dir"),
+			CustomScaffolders: v.GetStringMapString("scaffold.custom_scaffolders"),
+		},
 	}
 	return ec.ServerConfig.ParseEndpoint()
 }
