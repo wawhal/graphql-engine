@@ -6,6 +6,10 @@ import {
   hydrateTypeRelationships,
 } from './hasuraCustomTypeUtils';
 
+const getUnsupporedTypesError = unsupportedType => {
+  return `Encountered ${unsupportedType} type while parsing the type definition. Please use only object, scalar, enum and input types.`;
+};
+
 const getAstEntityDescription = def => {
   return def.description ? def.description.value.trim() : null;
 };
@@ -86,11 +90,15 @@ export const getTypeFromAstDef = astDef => {
       return handleObject(astDef);
     case 'SchemaDefinition':
       return {
-        error: 'You cannot have schema definitions in Action/Type definitions',
+        error: getUnsupporedTypesError('schema definition'),
       };
     case 'InterfaceTypeDefinition':
       return {
-        error: 'Interface types are not supported',
+        error: getUnsupporedTypesError('interface'),
+      };
+    case 'UnionTypeDefinition':
+      return {
+        error: getUnsupporedTypesError('union'),
       };
     default:
       return;
@@ -109,11 +117,15 @@ export const getTypesFromSdl = sdl => {
 
   const schemaAst = sdlParse(sdl);
 
-  schemaAst.definitions.forEach(def => {
-    const typeDef = getTypeFromAstDef(def);
-    typeDefinition.error = typeDef.error;
-    typeDefinition.types.push(typeDef);
-  });
+  for (let i = schemaAst.definitions.length - 1; i >= 0; i--) {
+    const typeDef = getTypeFromAstDef(schemaAst.definitions[i]);
+    if (typeDef.error) {
+      typeDefinition.error = typeDef.error;
+      break;
+    } else {
+      typeDefinition.types.push(typeDef);
+    }
+  }
 
   return typeDefinition;
 };

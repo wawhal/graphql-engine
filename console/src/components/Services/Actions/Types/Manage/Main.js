@@ -32,8 +32,11 @@ const Manage = ({ allTypes, dispatch, ...manageProps }) => {
 
   const onSave = () => {
     const { types: newTypes, error: _error } = getTypesFromSdl(sdl);
+    console.log(_error);
     if (_error) {
-      dispatch(showErrorNotification('Invalid Types Definition', _error));
+      return dispatch(
+        showErrorNotification('Invalid Types Definition', _error)
+      );
     }
     const stopFetching = () => dispatch(unsetFetching());
     dispatch(setFetching());

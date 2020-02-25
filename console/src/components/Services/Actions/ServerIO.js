@@ -142,9 +142,11 @@ export const createAction = () => (dispatch, getState) => {
     comment: actionDescription,
   };
 
-  const validationError = getStateValidationError(state, existingTypesList);
+  const validationError = getStateValidationError(state);
   if (validationError) {
-    return dispatch(showErrorNotification(validationError));
+    return dispatch(
+      showErrorNotification('Creating action failed', validationError)
+    );
   }
 
   const typesWithRelationships = hydrateTypeRelationships(

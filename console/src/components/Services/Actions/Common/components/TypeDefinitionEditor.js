@@ -33,19 +33,22 @@ const ActionDefinitionEditor = ({
       clearTimeout(timer);
     }
 
-    const parseDebounceTimer = setTimeout(() => {
-      if (v === '') {
-        return;
-      }
-      let _e = null;
-      let ast = null;
-      try {
-        ast = sdlParse(v);
-      } catch (e) {
-        _e = e;
-      }
-      onChange(null, _e, null, ast);
-    }, 1000);
+    let parseDebounceTimer = null;
+    if (v && v.trim() !== '') {
+      parseDebounceTimer = setTimeout(() => {
+        if (v === '') {
+          return;
+        }
+        let _e = null;
+        let ast = null;
+        try {
+          ast = sdlParse(v);
+        } catch (e) {
+          _e = e;
+        }
+        onChange(null, _e, null, ast);
+      }, 1000);
+    }
 
     onChange(v, null, parseDebounceTimer, null);
   };
