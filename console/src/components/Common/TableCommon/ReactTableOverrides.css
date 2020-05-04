@@ -158,3 +158,14 @@
 .ReactTable .rt-table .rt-tbody .rt-tr-group .rt-tr.-even .rt-td:first-child {
   min-width: 75px !important;
 }
+
+.ReactTable .rt-tbody .rt-th,
+.ReactTable .rt-tbody .rt-td {
+  display: flex;
+  justify-content: center;
+}
+
+.ReactTable .rt-thead .rt-resizable-header-content {
+  display: flex;
+  justify-content: center;
+}
