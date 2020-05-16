@@ -1,3 +1,6 @@
+import { Dispatch } from 'redux';
+import { connect, ConnectedProps } from 'react-redux';
+import { RouteComponentProps } from 'react-router';
 import React from 'react';
 import FilterQuery from '../../../../Common/FilterQuery/FilterQuery';
 import {
@@ -6,22 +9,13 @@ import {
   makeRelationshipFilter,
 } from '../../../../Common/FilterQuery/types';
 import { etInvocationLogsTable } from '../utils';
-import {
-  MapReduxToProps,
-  ComponentReduxConnector,
-  Dispatch,
-} from '../../../../../types';
+import { ReduxState } from '../../../../../types';
 import { makeOrderBy } from '../../../../Common/utils/v1QueryUtils';
 import TableHeader from '../TableCommon/TableHeader';
 import InvocationLogsTable from '../../Common/Components/InvocationLogsTable';
+import { RAEvents } from '../../types';
 
-type Props = {
-  dispatch: Dispatch;
-  triggerName: string;
-  readOnlyMode: boolean;
-};
-
-const InvocationLogs: React.FC<Props> = props => {
+const InvocationLogs = (props: Props) => {
   const { dispatch, triggerName, readOnlyMode } = props;
 
   const renderRows: FilterRenderProp = (
@@ -46,7 +40,7 @@ const InvocationLogs: React.FC<Props> = props => {
         'created_at',
       ]}
       identifier={triggerName}
-      dispatch={dispatch}
+      dispatch={dispatch as Dispatch<any>}
     />
   );
 
@@ -78,14 +72,22 @@ const InvocationLogs: React.FC<Props> = props => {
   );
 };
 
-const mapStateToProps: MapReduxToProps = (state, ownProps) => {
+type ExternalProps = RouteComponentProps<{ triggerName: string }, {}>;
+
+const mapPropsToState = (state: ReduxState, ownProps: ExternalProps) => {
   return {
     triggerName: ownProps.params.triggerName,
     readOnlyMode: state.main.readOnlyMode,
   };
 };
 
-const invocationLogsConnector: ComponentReduxConnector = connect =>
-  connect(mapStateToProps)(InvocationLogs);
+const connector = connect(mapPropsToState, (dispatch: Dispatch<RAEvents>) => ({
+  dispatch,
+}));
 
-export default invocationLogsConnector;
+type InjectedProps = ConnectedProps<typeof connector>;
+
+interface Props extends ExternalProps, InjectedProps {}
+
+const ConnectedInvocationLogs = connector(InvocationLogs);
+export default ConnectedInvocationLogs;

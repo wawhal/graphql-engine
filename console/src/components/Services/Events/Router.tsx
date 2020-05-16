@@ -99,7 +99,7 @@ const getTriggersRouter = (
         />
         <Route
           path={getETInvocationLogsRoute(':triggerName', 'relative')}
-          component={ETInvocationLogs(connect)}
+          component={ETInvocationLogs}
         />
         <Route
           path={getDataEventsLandingRoute('relative')}
