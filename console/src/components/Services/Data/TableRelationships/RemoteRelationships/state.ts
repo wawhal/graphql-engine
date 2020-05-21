@@ -14,10 +14,10 @@ import {
   ArgValueType,
 } from './types';
 
-const getDefaultState = (table: any) => ({
+const getDefaultState = (table: any): RemoteRelationship => ({
   name: '',
   remoteSchema: '',
-  remoteField: [],
+  remoteFields: [],
   table: {
     name: table.table_name,
     schema: table.table_schema,
@@ -96,19 +96,19 @@ const reducer = (
     }
     case 'ToggleField': {
       const changedField = action.data;
-      const selectedField = findRemoteField(state.remoteField, changedField);
+      const selectedField = findRemoteField(state.remoteFields, changedField);
       if (selectedField) {
         return {
           ...state,
-          remoteField: state.remoteField.filter(
+          remoteFields: state.remoteFields.filter(
             f => !(f.depth >= changedField.depth)
           ),
         };
       }
       return {
         ...state,
-        remoteField: [
-          ...state.remoteField.filter(f => !(f.depth >= changedField.depth)),
+        remoteFields: [
+          ...state.remoteFields.filter(f => !(f.depth >= changedField.depth)),
           { ...changedField, arguments: [] },
         ],
       };
@@ -119,7 +119,7 @@ const reducer = (
       const changedArg = action.data;
       return {
         ...state,
-        remoteField: state.remoteField.map(rf => {
+        remoteFields: state.remoteFields.map(rf => {
           if (
             rf.name === changedArg.parentField &&
             rf.depth === changedArg.parentFieldDepth
@@ -151,12 +151,14 @@ const reducer = (
     }
     case 'ChangeArgValueType': {
       const changedArg = action.data.arg;
-      const parentField = findArgParentField(state.remoteField, changedArg);
+      const parentField = findArgParentField(state.remoteFields, changedArg);
       if (parentField) {
+        console.log('Found Parent Field');
         const newParentField = {
           ...parentField,
           arguments: parentField.arguments.map(a => {
             if (compareRFArguments(a, changedArg)) {
+              console.log('Foud Argument');
               return {
                 ...a,
                 value: {
@@ -170,7 +172,7 @@ const reducer = (
         };
         return {
           ...state,
-          remoteField: state.remoteField.map(f => {
+          remoteFields: state.remoteFields.map(f => {
             if (compareRemoteFields(f, parentField)) {
               return newParentField;
             }
@@ -182,7 +184,7 @@ const reducer = (
     }
     case 'ChangeArgValue': {
       const changedArg = action.data.arg;
-      const parentField = findArgParentField(state.remoteField, changedArg);
+      const parentField = findArgParentField(state.remoteFields, changedArg);
       if (parentField) {
         const newParentField = {
           ...parentField,
@@ -201,7 +203,7 @@ const reducer = (
         };
         return {
           ...state,
-          remoteField: state.remoteField.map(f => {
+          remoteFields: state.remoteFields.map(f => {
             if (compareRemoteFields(f, parentField)) {
               return newParentField;
             }

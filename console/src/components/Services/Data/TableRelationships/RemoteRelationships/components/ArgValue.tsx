@@ -19,7 +19,7 @@ const ArgValueElement: React.FC<Props> = ({
     <div className={styles.display_flex}>
       <select
         onChange={handleArgValueTypeChange}
-        value={value.value}
+        value={value.type}
         className={`form-control ${styles.argValue}`}
       >
         <option key="arg-value-column" value="column">

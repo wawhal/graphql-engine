@@ -54,7 +54,7 @@ export type RJSchemaTreeElement = TreeArgElement | TreeFieldElement;
 export type RemoteRelationship = {
   name: string;
   remoteSchema: string;
-  remoteField: RemoteField[];
+  remoteFields: RemoteField[];
   table: {
     name: string;
     schema: string;
@@ -172,7 +172,7 @@ export const parseRemoteRelationship = (
       name: relationship.table_name,
       schema: relationship.table_schema,
     },
-    remoteField: allRemoteFields,
+    remoteFields: allRemoteFields,
   };
 };
 
@@ -182,7 +182,7 @@ const isFieldChecked = (
   depth: number,
   parent?: string
 ) => {
-  return relationship.remoteField.some(f => {
+  return relationship.remoteFields.some(f => {
     return f.name === fieldName && f.depth === depth && f.parent === parent;
   });
 };
@@ -199,7 +199,7 @@ export const getCheckedArgValue = (
   parentFieldDepth: number,
   parent?: string
 ): ArgValue | null => {
-  const parentRemoteField = relationship.remoteField.find(f => {
+  const parentRemoteField = relationship.remoteFields.find(f => {
     return f.name === parentField && f.depth === parentFieldDepth;
   });
   if (parentRemoteField) {
