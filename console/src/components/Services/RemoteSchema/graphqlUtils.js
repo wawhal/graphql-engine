@@ -23,7 +23,7 @@ const getIntrospectionQuery = remoteSchemaName => {
 };
 
 // custom hook for introspecting remote schema
-export const useIntrospectionSchema = (remoteSchemaName, headers) => {
+export const useIntrospectionSchemaRemote = (remoteSchemaName, headers) => {
   const [schema, setSchema] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
