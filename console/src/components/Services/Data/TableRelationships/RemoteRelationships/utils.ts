@@ -1,5 +1,6 @@
 import {
   isInputObjectType,
+  isInterfaceType,
   isEnumType,
   isObjectType,
   isScalarType,
@@ -38,7 +39,7 @@ export type RemoteFieldArgument = {
   isChecked: boolean;
   parent?: string;
   value: ArgValue;
-  type?: string;
+  type: string;
 };
 export interface TreeArgElement extends RemoteFieldArgument {
   isLeafArg: boolean;
@@ -54,7 +55,7 @@ export type RemoteField = {
 export interface TreeFieldElement extends Omit<RemoteField, 'arguments'> {
   kind: 'field';
   isChecked: boolean;
-  hasArgs: boolean;
+  enabled: boolean;
 }
 
 export type RJSchemaTreeElement = TreeArgElement | TreeFieldElement;
@@ -97,6 +98,13 @@ export const parseArgValue = (argValue: any): ArgValue | null => {
       type: 'String',
     };
   }
+  if (argValue === true || argValue === false) {
+    return {
+      kind: 'static',
+      value: argValue.toString(),
+      type: 'Boolean',
+    };
+  }
   return {
     kind: 'static',
     value: argValue.toString(),
@@ -126,6 +134,7 @@ const serialiseArguments = (
         parentField,
         parentFieldDepth,
         value: argValueMetadata,
+        type: argValueMetadata.type,
       });
     } else {
       allArgs = [
@@ -188,10 +197,18 @@ export const parseRemoteRelationship = (
   };
 };
 
-const getTypedArgValueInput = (argValue: ArgValue) => {
+const getTypedArgValueInput = (argValue: ArgValue, type: string) => {
   let error: string | null = null;
   let value: any;
-  switch (argValue.type) {
+
+  if (argValue.kind === 'column') {
+    return {
+      value: `$${argValue.value}`,
+      error,
+    };
+  }
+
+  switch (type) {
     case 'Float': {
       const number = parseFloat(argValue.value);
       if (window.isNaN(number)) {
@@ -202,9 +219,14 @@ const getTypedArgValueInput = (argValue: ArgValue) => {
     }
     case 'Int': {
       const number = parseInt(argValue.value, 10);
+      console.log('----------------');
+      console.log(number);
+      console.log(argValue.value);
+      console.log('----------------');
       if (window.isNaN(number)) {
         error = 'invalid int value';
       }
+      value = number;
       break;
     }
     case 'ID': {
@@ -212,6 +234,7 @@ const getTypedArgValueInput = (argValue: ArgValue) => {
       if (window.isNaN(number)) {
         error = 'invalid int value';
       }
+      value = number;
       break;
     }
     case 'Boolean': {
@@ -226,11 +249,7 @@ const getTypedArgValueInput = (argValue: ArgValue) => {
       break;
     }
     default:
-      if (argValue.kind === 'column') {
-        value = `$${argValue.value}`;
-      } else {
-        value = argValue.value;
-      }
+      value = argValue.value;
       break;
   }
   return {
@@ -241,7 +260,7 @@ const getTypedArgValueInput = (argValue: ArgValue) => {
 
 export const getRemoteRelPayload = (relationship: RemoteRelationship) => {
   const hasuraFields: string[] = [];
-  const getRemoteFieldARguments = (field: RemoteField) => {
+  const getRemoteFieldArguments = (field: RemoteField) => {
     const getArgumentObject = (depth: number, parent?: string) => {
       const depthArguments = field.arguments.filter(
         a => a.depth === depth && a.parent === parent
@@ -250,7 +269,10 @@ export const getRemoteRelPayload = (relationship: RemoteRelationship) => {
         (argObj: any, currentArg) => {
           const nestedArgObj = getArgumentObject(depth + 1, currentArg.name);
           if (!nestedArgObj) {
-            const argValueTyped = getTypedArgValueInput(currentArg.value);
+            const argValueTyped = getTypedArgValueInput(
+              currentArg.value,
+              currentArg.type
+            );
             if (argValueTyped.error) {
               throw Error(argValueTyped.error);
             }
@@ -287,17 +309,20 @@ export const getRemoteRelPayload = (relationship: RemoteRelationship) => {
     depthRemoteFields.forEach(f => {
       obj[f.name] = {
         field: getRemoteFieldObject(depth + 1),
-        arguments: getRemoteFieldARguments(f),
+        arguments: getRemoteFieldArguments(f) || {},
       };
     });
-    return obj;
+    return Object.keys(obj).length ? obj : undefined;
   };
 
   return {
     name: relationship.name,
     remote_schema: relationship.remoteSchema,
     remote_field: getRemoteFieldObject(0),
-    hasura_fields: hasuraFields.filter((v, i, s) => s.indexOf(v) === i),
+    hasura_fields: hasuraFields
+      .map(f => f.substr(1))
+      .filter((v, i, s) => s.indexOf(v) === i),
+    table: relationship.table,
   };
 };
 
@@ -318,6 +343,7 @@ const isFieldChecked = (
 export const getCheckedArgValue = (
   relationship: RemoteRelationship,
   argName: string,
+  argType: GraphQLType,
   depth: number,
   parentField: string,
   parentFieldDepth: number,
@@ -332,7 +358,10 @@ export const getCheckedArgValue = (
         arg.name === argName && arg.depth === depth && arg.parent === parent
     );
     if (checkedArg) {
-      return checkedArg.value;
+      return {
+        ...checkedArg.value,
+        type: getUnderlyingType(argType).type.name,
+      };
     }
   }
   return null;
@@ -351,6 +380,7 @@ const buildArgElement = (
   const argValue = getCheckedArgValue(
     relationship,
     arg.name,
+    argType,
     depth,
     parentField,
     parentFieldDepth,
@@ -374,7 +404,7 @@ const buildArgElement = (
     isChecked: !!argValue,
     isLeafArg,
   });
-  if (isInputObjectType(argType) && !!argValue) {
+  if (!!argValue && (isInputObjectType(argType) || isInterfaceType(argType))) {
     const argFields = argType.getFields();
     Object.values(argFields).forEach(argField => {
       buildArgElement(
@@ -400,14 +430,14 @@ const buildFieldElement = (
   const { type: fieldType }: { type: GraphQLType } = getUnderlyingType(
     field.type
   );
-  const isChecked = isFieldChecked(relationship, field.name, 0, undefined);
+  const isChecked = isFieldChecked(relationship, field.name, depth, parent);
   callback({
     name: field.name,
     kind: 'field',
     depth,
     parent,
     isChecked,
-    hasArgs: field.args && !!field.args.length,
+    enabled: (field.args && !!field.args.length) || isObjectType(fieldType),
   });
   if (isChecked) {
     if (field.args) {
@@ -415,7 +445,7 @@ const buildFieldElement = (
         buildArgElement(relationship, arg, 0, field.name, depth, callback);
       });
     }
-    if (isObjectType(fieldType)) {
+    if (isObjectType(fieldType) || isInterfaceType(fieldType)) {
       const subFields = fieldType.getFields();
       Object.values(subFields).forEach(subField => {
         buildFieldElement(

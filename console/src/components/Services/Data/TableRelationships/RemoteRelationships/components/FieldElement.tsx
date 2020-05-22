@@ -14,19 +14,20 @@ const FieldElement: React.FC<Props> = ({ field, handleToggle }) => {
     fontStyle: 'normal',
   };
   const toggle = () => handleToggle(field);
+  const title = field.enabled
+    ? undefined
+    : 'Only fields with arguments or subfields can be toggled';
   return (
     <div
       className={`${styles.display_flex} ${styles.add_mar_bottom_mid}`}
       style={style}
-      title={
-        field.hasArgs ? undefined : 'Only fields with arguments can be toggled'
-      }
+      title={title}
     >
       <div className={styles.add_mar_right_small}>
         <input
           checked={field.isChecked}
           type="checkbox"
-          disabled={!field.hasArgs}
+          disabled={!field.enabled}
           className={styles.cursorPointer}
           onChange={toggle}
         />

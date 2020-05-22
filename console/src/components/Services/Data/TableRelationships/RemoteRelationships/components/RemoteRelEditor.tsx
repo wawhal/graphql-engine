@@ -38,8 +38,6 @@ const RemoteRelEditor: React.FC<Props> = ({
   state,
   dispatch,
 }) => {
-  console.log(state);
-
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.persist();
     dispatch(setName(e.target.value));

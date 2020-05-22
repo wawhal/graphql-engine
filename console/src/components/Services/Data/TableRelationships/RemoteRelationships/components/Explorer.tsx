@@ -60,6 +60,7 @@ const Explorer: React.FC<Props> = ({
   }
 
   const tree = buildSchemaTree(relationship, schema || undefined);
+  console.log(tree);
 
   return (
     <div className={styles.schemaExplorerContainer}>
@@ -74,6 +75,7 @@ const Explorer: React.FC<Props> = ({
                 handleArgValueChange={handleArgValueChange}
                 handleArgValueKindChange={handleArgValueKindChange}
                 columns={columns}
+                key={`arg-element-${el.name}-${el.depth}`}
               />
             );
           }

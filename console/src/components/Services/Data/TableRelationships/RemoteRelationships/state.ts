@@ -131,8 +131,8 @@ const reducer = (
             if (selectedArg) {
               return {
                 ...rf,
-                arguments: rf.arguments.filter(a =>
-                  compareRFArguments(a, changedArg)
+                arguments: rf.arguments.filter(
+                  a => !compareRFArguments(a, changedArg)
                 ),
               };
             }
@@ -161,6 +161,7 @@ const reducer = (
               console.log('Foud Argument');
               return {
                 ...a,
+                type: action.data.valueKind === 'column' ? 'String' : a.type,
                 value: {
                   ...a.value,
                   kind: action.data.valueKind,
@@ -235,17 +236,21 @@ export const useRemoteRelationship = (
       : getDefaultState(table)
   );
 
+  const reset = () => {
+    dispatch(
+      resetState(
+        relationship
+          ? parseRemoteRelationship(relationship)
+          : getDefaultState(table)
+      )
+    );
+  };
+
+  React.useEffect(reset, [relationship]);
+
   return {
     state,
     dispatch,
-    reset: () => {
-      dispatch(
-        resetState(
-          relationship
-            ? parseRemoteRelationship(relationship)
-            : getDefaultState(table)
-        )
-      );
-    },
+    reset,
   };
 };

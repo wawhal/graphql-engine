@@ -4,6 +4,7 @@ import { RemoteRelationshipServer } from '../utils';
 import RemoteRelEditor from './RemoteRelEditor';
 import RemoteRelCollapsedLabel from './EditorCollapsed';
 import { useRemoteRelationship } from '../state';
+import { saveRemoteRelationship, dropRemoteRelationship } from '../../Actions';
 
 type Props = {
   relationship?: RemoteRelationshipServer;
@@ -18,7 +19,7 @@ const EditorWrapper: React.FC<Props> = ({
   table,
   isLast,
   remoteSchemas,
-  // reduxDispatch,
+  reduxDispatch,
 }) => {
   const { state, dispatch, reset } = useRemoteRelationship(table, relationship);
 
@@ -36,9 +37,15 @@ const EditorWrapper: React.FC<Props> = ({
     <RemoteRelCollapsedLabel relationship={relationship} />
   );
 
-  const saveFunc = () => {};
+  const saveFunc = (toggle: VoidFunction) => {
+    reduxDispatch(saveRemoteRelationship(state, relationship, toggle));
+  };
 
-  const removeFunc = () => {};
+  const removeFunc = !isLast
+    ? () => {
+        reduxDispatch(dropRemoteRelationship(state, relationship));
+      }
+    : null;
 
   const expandButtonText = isLast ? 'Add a remote relationship' : 'Edit';
   const collapseButtonText = isLast ? 'Cancel' : 'Close';
