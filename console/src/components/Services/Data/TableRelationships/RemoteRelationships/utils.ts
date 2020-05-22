@@ -139,6 +139,16 @@ const serialiseArguments = (
     } else {
       allArgs = [
         ...allArgs,
+        {
+          name: argName,
+          depth,
+          parent,
+          isChecked: false,
+          parentField,
+          parentFieldDepth,
+          value: defaultArgValue,
+          type: 'String',
+        },
         ...serialiseArguments(
           argValue,
           depth + 1,
@@ -353,11 +363,14 @@ export const getCheckedArgValue = (
     return f.name === parentField && f.depth === parentFieldDepth;
   });
   if (parentRemoteField) {
+    console.log('Foudn parent Field');
+    console.log(parentRemoteField);
     const checkedArg = parentRemoteField.arguments.find(
       arg =>
         arg.name === argName && arg.depth === depth && arg.parent === parent
     );
     if (checkedArg) {
+      console.log('Foudn checked arg');
       return {
         ...checkedArg.value,
         type: getUnderlyingType(argType).type.name,
@@ -377,6 +390,8 @@ const buildArgElement = (
   parent?: string
 ) => {
   const { type: argType }: { type: GraphQLType } = getUnderlyingType(arg.type);
+  console.log(parentField);
+  console.log(arg.name);
   const argValue = getCheckedArgValue(
     relationship,
     arg.name,
