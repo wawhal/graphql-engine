@@ -11,8 +11,8 @@ import {
   parseRemoteRelationship,
   TreeFieldElement,
   TreeArgElement,
-  ArgValueType,
-} from './types';
+  ArgValueKind,
+} from './utils';
 
 const getDefaultState = (table: any): RemoteRelationship => ({
   name: '',
@@ -43,14 +43,14 @@ export const toggleArg = (data: TreeArgElement) => ({
   data,
 });
 
-export const setArgValueType = (
+export const setArgValueKind = (
   arg: TreeArgElement,
-  valueType: ArgValueType
+  valueKind: ArgValueKind
 ) => ({
-  type: 'ChangeArgValueType' as const,
+  type: 'ChangeArgValueKind' as const,
   data: {
     arg,
-    valueType,
+    valueKind,
   },
 });
 export const setArgValue = (arg: TreeArgElement, value: string) => ({
@@ -71,7 +71,7 @@ export type Action =
   | ReturnType<typeof toggleArg>
   | ReturnType<typeof setName>
   | ReturnType<typeof setRemoteSchema>
-  | ReturnType<typeof setArgValueType>
+  | ReturnType<typeof setArgValueKind>
   | ReturnType<typeof setArgValue>
   | ReturnType<typeof resetState>;
 
@@ -149,7 +149,7 @@ const reducer = (
       };
       break;
     }
-    case 'ChangeArgValueType': {
+    case 'ChangeArgValueKind': {
       const changedArg = action.data.arg;
       const parentField = findArgParentField(state.remoteFields, changedArg);
       if (parentField) {
@@ -162,7 +162,8 @@ const reducer = (
               return {
                 ...a,
                 value: {
-                  type: action.data.valueType,
+                  ...a.value,
+                  kind: action.data.valueKind,
                   value: '',
                 },
               };

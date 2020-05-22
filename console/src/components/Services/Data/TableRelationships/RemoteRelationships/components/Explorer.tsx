@@ -4,10 +4,10 @@ import { useIntrospectionSchemaRemote } from '../../../../RemoteSchema/graphqlUt
 import {
   RemoteRelationship,
   TreeArgElement,
-  ArgValueType,
+  ArgValueKind,
   TreeFieldElement,
   buildSchemaTree,
-} from '../types';
+} from '../utils';
 import { LoadingSkeleton, NoRemoteSchemaPlaceholder } from './PlaceHolder';
 import ArgElement from './ArgElement';
 import FieldElement from './FieldElement';
@@ -17,7 +17,7 @@ type Props = {
   relationship: RemoteRelationship;
   toggleArg: (a: TreeArgElement) => void;
   toggleField: (f: TreeFieldElement) => void;
-  handleArgValueTypeChange: (a: TreeArgElement, type: ArgValueType) => void;
+  handleArgValueKindChange: (a: TreeArgElement, type: ArgValueKind) => void;
   handleArgValueChange: (a: TreeArgElement, value: string) => void;
   remoteSchemaName: string;
   columns: string[];
@@ -28,7 +28,7 @@ const Explorer: React.FC<Props> = ({
   toggleArg,
   toggleField,
   handleArgValueChange,
-  handleArgValueTypeChange,
+  handleArgValueKindChange,
   remoteSchemaName,
   columns,
 }) => {
@@ -72,7 +72,7 @@ const Explorer: React.FC<Props> = ({
                 arg={el}
                 handleToggle={toggleArg}
                 handleArgValueChange={handleArgValueChange}
-                handleArgValueTypeChange={handleArgValueTypeChange}
+                handleArgValueKindChange={handleArgValueKindChange}
                 columns={columns}
               />
             );

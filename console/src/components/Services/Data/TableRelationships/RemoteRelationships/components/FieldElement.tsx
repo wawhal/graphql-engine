@@ -1,5 +1,5 @@
 import React from 'react';
-import { TreeFieldElement } from '../types';
+import { TreeFieldElement } from '../utils';
 import styles from '../SchemaExplorer.scss';
 
 type Props = {

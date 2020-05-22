@@ -314,3 +314,8 @@ export const getFetchManualTriggersQuery = tableName => ({
     },
   },
 });
+
+export const getSaveRemoteRelQuery = (args, isNew) => ({
+  type: `${isNew ? 'create' : 'update'}_remote_relationship`,
+  args,
+});

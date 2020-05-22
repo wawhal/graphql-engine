@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../../TableModify/ModifyTable.scss';
-import { RemoteRelationshipServer } from './types';
+import { RemoteRelationshipServer } from './utils';
 import RemoteRelationshipList from './components/RemoteRelationshipList';
 import { fetchRemoteSchemas } from '../../../RemoteSchema/Actions';
 

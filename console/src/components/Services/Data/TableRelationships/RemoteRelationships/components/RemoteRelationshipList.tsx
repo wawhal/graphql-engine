@@ -1,5 +1,5 @@
 import React from 'react';
-import { RemoteRelationshipServer } from '../types';
+import { RemoteRelationshipServer } from '../utils';
 import RemoteRelationshipEditor from './RemoteRelEditorWrapper';
 
 type Props = {

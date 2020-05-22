@@ -1,10 +1,10 @@
 import React from 'react';
-import { ArgValue } from '../types';
+import { ArgValue } from '../utils';
 import styles from '../SchemaExplorer.scss';
 
 type Props = {
   value: ArgValue;
-  handleArgValueTypeChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleArgValueKindChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleArgValueChange: (e: React.BaseSyntheticEvent) => void;
   columns: string[];
 };
@@ -13,13 +13,13 @@ const ArgValueElement: React.FC<Props> = ({
   columns,
   value,
   handleArgValueChange,
-  handleArgValueTypeChange,
+  handleArgValueKindChange,
 }) => {
   return (
     <div className={styles.display_flex}>
       <select
-        onChange={handleArgValueTypeChange}
-        value={value.type}
+        onChange={handleArgValueKindChange}
+        value={value.kind}
         className={`form-control ${styles.argValue}`}
       >
         <option key="arg-value-column" value="column">
@@ -29,7 +29,7 @@ const ArgValueElement: React.FC<Props> = ({
           From Static Value
         </option>
       </select>
-      {value.type === 'column' ? (
+      {value.kind === 'column' ? (
         <select
           value={value.value}
           className={`form-control ${styles.argValue}`}

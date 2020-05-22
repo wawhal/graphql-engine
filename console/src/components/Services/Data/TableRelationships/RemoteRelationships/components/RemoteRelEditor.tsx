@@ -3,23 +3,23 @@ import {
   RemoteRelationship,
   TreeArgElement,
   TreeFieldElement,
-  ArgValueType,
-} from '../types';
+  ArgValueKind,
+} from '../utils';
 import {
   Action as RemoteRelAction,
   setName,
   setRemoteSchema,
   setArgValue,
-  setArgValueType,
+  setArgValueKind,
   toggleArg,
   toggleField,
 } from '../state';
 
 import styles from '../SchemaExplorer.scss';
 import {
-  relName as relNameTooltip,
-  remoteSchema as remoteSchemaTooltip,
-  configuration as configTooltip,
+  RelName as RelNameTooltip,
+  RemoteSchema as RemoteSchemaTooltip,
+  Configuration as ConfigTooltip,
 } from '../Tooltips';
 import Explorer from './Explorer';
 
@@ -57,13 +57,13 @@ const RemoteRelEditor: React.FC<Props> = ({
 
   const handleArgToggle = (arg: TreeArgElement) => dispatch(toggleArg(arg));
 
-  const handleArgValueTypeChange = (
+  const handleArgValueKindChange = (
     arg: TreeArgElement,
-    type: ArgValueType
+    type: ArgValueKind
   ) => {
     console.log('Changing type');
     console.log(type);
-    dispatch(setArgValueType(arg, type));
+    dispatch(setArgValueKind(arg, type));
   };
 
   const handleArgValueChange = (arg: TreeArgElement, value: string) => {
@@ -86,7 +86,9 @@ const RemoteRelEditor: React.FC<Props> = ({
             <div className={styles.add_mar_right_small}>
               <b>Name</b>
             </div>
-            <div>{relNameTooltip(table.table_name)}</div>
+            <div>
+              <RelNameTooltip tableName={table.table_name} />
+            </div>
           </div>
           <div>
             <input
@@ -107,7 +109,9 @@ const RemoteRelEditor: React.FC<Props> = ({
             <div className={styles.add_mar_right_small}>
               <b>Remote Schema:</b>
             </div>
-            <div>{remoteSchemaTooltip(table.table_name)}</div>
+            <div>
+              <RemoteSchemaTooltip tableName={table.table_name} />
+            </div>
           </div>
           <div>
             <select
@@ -136,13 +140,15 @@ const RemoteRelEditor: React.FC<Props> = ({
             <div className={styles.add_mar_right_small}>
               <b>Configuration:</b>
             </div>
-            <div>{configTooltip()}</div>
+            <div>
+              <ConfigTooltip />
+            </div>
           </div>
           <Explorer
             relationship={state}
             toggleArg={handleArgToggle}
             toggleField={handleFieldToggle}
-            handleArgValueTypeChange={handleArgValueTypeChange}
+            handleArgValueKindChange={handleArgValueKindChange}
             handleArgValueChange={handleArgValueChange}
             remoteSchemaName={state.remoteSchema}
             columns={tableColumns}

@@ -1,12 +1,12 @@
 import React from 'react';
-import { TreeArgElement, ArgValueType } from '../types';
+import { TreeArgElement, ArgValueKind } from '../utils';
 import styles from '../SchemaExplorer.scss';
 import ArgValueElement from './ArgValue';
 
 type Props = {
   arg: TreeArgElement;
   handleToggle: (a: TreeArgElement) => void;
-  handleArgValueTypeChange: (a: TreeArgElement, type: ArgValueType) => void;
+  handleArgValueKindChange: (a: TreeArgElement, type: ArgValueKind) => void;
   handleArgValueChange: (a: TreeArgElement, value: string) => void;
   columns: string[];
 };
@@ -15,7 +15,7 @@ const ArgElement: React.FC<Props> = ({
   arg,
   handleToggle,
   handleArgValueChange,
-  handleArgValueTypeChange,
+  handleArgValueKindChange,
   columns,
 }) => {
   const style = {
@@ -48,8 +48,8 @@ const ArgElement: React.FC<Props> = ({
       {arg.isChecked && arg.isLeafArg && (
         <ArgValueElement
           value={arg.value}
-          handleArgValueTypeChange={e =>
-            handleArgValueTypeChange(arg, e.target.value as ArgValueType)
+          handleArgValueKindChange={e =>
+            handleArgValueKindChange(arg, e.target.value as ArgValueKind)
           }
           handleArgValueChange={e => handleArgValueChange(arg, e.target.value)}
           columns={columns}

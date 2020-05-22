@@ -1,6 +1,6 @@
 import React from 'react';
 import ExpandableEditor from '../../../../../Common/Layout/ExpandableEditor/Editor';
-import { RemoteRelationshipServer } from '../types';
+import { RemoteRelationshipServer } from '../utils';
 import RemoteRelEditor from './RemoteRelEditor';
 import RemoteRelCollapsedLabel from './EditorCollapsed';
 import { useRemoteRelationship } from '../state';
